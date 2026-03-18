@@ -20,16 +20,6 @@ public:
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawTriangle();
 
-	struct Particle
-	{
-		float centerX = 0;
-		float centerY = 0;
-		float size = 0.1;
-		float mass = 1;
-		float vx = 0;
-		float vy = 0;
-	};
-
 private:
 	std::default_random_engine dre{};
 	std::uniform_real_distribution<float> urd{-3.f, 3.f};
@@ -46,13 +36,13 @@ private:
 	unsigned int m_WindowSizeX = 0;
 	unsigned int m_WindowSizeY = 0;
 
-	GLuint m_VBORect = 0;
-	GLuint m_SolidRectShader = 0;
+	GLuint	m_VBORect = 0;
+	GLuint	m_SolidRectShader = 0;
 
-	GLuint m_VBOTriangle = 0;
-	GLuint m_TriangleShader = 0;
+	GLuint	m_VBOTriangle = 0;
+	GLuint	m_TriangleShader = 0;
 
-	GLuint m_VBOParticles = 0;
-
+	GLuint	m_VBOParticles = 0;
+	int		numParticles = 1000;
 };
 

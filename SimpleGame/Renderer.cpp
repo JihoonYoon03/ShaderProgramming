@@ -20,7 +20,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 	m_TriangleShader = CompileShaders("./Shaders/Triangle.vs", "./Shaders/Triangle.fs");
-	
+
 	//Create VBOs
 	CreateVertexBufferObjects();
 
@@ -35,7 +35,6 @@ bool Renderer::IsInitialized()
 	return m_Initialized;
 }
 
-std::array<Renderer::Particle, 1000> particles{};
 
 void Renderer::CreateVertexBufferObjects()
 {
@@ -83,19 +82,34 @@ void Renderer::CreateVertexBufferObjects()
 	// 동기식으로 작동. 데이터 올라갈 때 까지 기다림
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
 
-	for (auto particle : particles) {
-		particle.vx = urd(dre);
-		particle.vy = urd(dre);
-	}
-
 	// VBO 아이디 지정 및 바인딩
 	glGenBuffers(1, &m_VBOParticles);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle) * numParticles, nullptr, GL_STATIC_DRAW);
 
-	// glBufferData에서 m_VBOTriangle에 실제 메모리 주소 저장한다고 보면 됨
-	// 동기식으로 작동. 데이터 올라갈 때 까지 기다림
-	glBufferData(GL_ARRAY_BUFFER, sizeof(particles), particles.data(), GL_STATIC_DRAW);
+	for (int i = 0; i < numParticles; ++i) {
+		float vx_ = urd(dre);
+		float vy_ = urd(dre);
 
+		float newParticle[] =
+		{
+			centerX - size / 2, centerY - size / 2, 0.f,
+			mass, vx_, vy_,
+			centerX + size / 2, centerY - size / 2, 0.f,
+			mass, vx_, vy_,
+			centerX + size / 2, centerY + size / 2, 0.f,
+			mass, vx_, vy_,	// Triangle 1
+
+			centerX - size / 2, centerY - size / 2, 0.f,
+			mass, vx_, vy_,
+			centerX + size / 2, centerY + size / 2, 0.f,
+			mass, vx_, vy_,
+			centerX - size / 2, centerY + size / 2, 0.f,
+			mass, vx_, vy_	// Triangle 2
+		};
+
+		glBufferSubData(GL_ARRAY_BUFFER, sizeof(newParticle) * i, sizeof(newParticle), newParticle);
+	}
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -133,7 +147,7 @@ void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum S
 	glAttachShader(ShaderProgram, ShaderObj);
 }
 
-bool Renderer::ReadFile(char* filename, std::string *target)
+bool Renderer::ReadFile(char* filename, std::string* target)
 {
 	std::ifstream file(filename);
 	if (file.fail())
@@ -237,7 +251,7 @@ float g_time = 0;
 void Renderer::DrawTriangle()
 {
 	g_time += 0.01;
-	
+
 	//Program select
 	glUseProgram(m_TriangleShader);
 
@@ -268,14 +282,16 @@ void Renderer::DrawTriangle()
 		GL_FALSE,
 		sizeof(float) * 6, (GLvoid*)(sizeof(float) * 4));
 
-	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDrawArrays(GL_TRIANGLES, 0, 6 * numParticles);
 
 	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribMass);
+	glDisableVertexAttribArray(attribVel);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
+void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
 {
 	*newX = x * 2.f / m_WindowSizeX;
 	*newY = y * 2.f / m_WindowSizeY;
