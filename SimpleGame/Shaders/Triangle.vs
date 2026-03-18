@@ -3,6 +3,11 @@
 uniform float u_Time;
 
 in vec3 a_Position;
+in float a_Mass;
+in vec2 a_Vel;
+
+const float c_PI = 3.141592;
+const float c_G = -9.8;
 
 void Sin1()
 {
@@ -73,7 +78,24 @@ void AI_motion()
     gl_Position = vec4(pos, 1.0);
 }
 
+void Falling()
+{
+    float t = mod(u_Time, 1.0);
+    float tt = t * t;
+    float vx, vy;
+    vx = a_Vel.x;
+    vy = a_Vel.y;
+
+    vec4 newPos;
+    newPos.x = a_Position.x + vx * t;
+    newPos.y = a_Position.y + vy * t + 0.5 * c_G * tt;
+    newPos.z = 0;
+    newPos.w = 1;
+
+    gl_Position = newPos;
+}
+
 void main()
 {
-    AI_motion();
+    Falling();
 }

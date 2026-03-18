@@ -35,6 +35,8 @@ bool Renderer::IsInitialized()
 	return m_Initialized;
 }
 
+std::array<Renderer::Particle, 1000> particles{};
+
 void Renderer::CreateVertexBufferObjects()
 {
 	float rect[]
@@ -51,17 +53,26 @@ void Renderer::CreateVertexBufferObjects()
 	float centerX = 0;
 	float centerY = 0;
 	float size = 0.1;
+	float mass = 1;	// kg
+	float vx = 1;
+	float vy = 3;
 
 	float triangle[]
 		=
 	{
 		centerX - size / 2, centerY - size / 2, 0.f,
+		mass, vx, vy,
 		centerX + size / 2, centerY - size / 2, 0.f,
-		centerX + size / 2, centerY + size / 2, 0.f,	// Triangle 1
+		mass, vx, vy,
+		centerX + size / 2, centerY + size / 2, 0.f,
+		mass, vx, vy,	// Triangle 1
 
 		centerX - size / 2, centerY - size / 2, 0.f,
+		mass, vx, vy,
 		centerX + size / 2, centerY + size / 2, 0.f,
-		centerX - size / 2, centerY + size / 2, 0.f		// Triangle 2
+		mass, vx, vy,
+		centerX - size / 2, centerY + size / 2, 0.f,
+		mass, vx, vy	// Triangle 2
 	};
 
 	// VBO 아이디 지정 및 바인딩
@@ -71,6 +82,20 @@ void Renderer::CreateVertexBufferObjects()
 	// glBufferData에서 m_VBOTriangle에 실제 메모리 주소 저장한다고 보면 됨
 	// 동기식으로 작동. 데이터 올라갈 때 까지 기다림
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
+
+	for (auto particle : particles) {
+		particle.vx = urd(dre);
+		particle.vy = urd(dre);
+	}
+
+	// VBO 아이디 지정 및 바인딩
+	glGenBuffers(1, &m_VBOParticles);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
+
+	// glBufferData에서 m_VBOTriangle에 실제 메모리 주소 저장한다고 보면 됨
+	// 동기식으로 작동. 데이터 올라갈 때 까지 기다림
+	glBufferData(GL_ARRAY_BUFFER, sizeof(particles), particles.data(), GL_STATIC_DRAW);
+
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -211,7 +236,7 @@ float g_time = 0;
 
 void Renderer::DrawTriangle()
 {
-	g_time += 0.0001;
+	g_time += 0.01;
 	
 	//Program select
 	glUseProgram(m_TriangleShader);
@@ -220,14 +245,28 @@ void Renderer::DrawTriangle()
 	glUniform1f(uTime, g_time);
 
 	int attribPosition = glGetAttribLocation(m_TriangleShader, "a_Position");
+	int attribMass = glGetAttribLocation(m_TriangleShader, "a_Mass");
+	int attribVel = glGetAttribLocation(m_TriangleShader, "a_Vel");
 	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribMass);
+	glEnableVertexAttribArray(attribVel);
 
 	// DX12 Root Signature처럼 Vertex shader 입력에 맞게 수정
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTriangle);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
 	glVertexAttribPointer(attribPosition,
 		3, GL_FLOAT,
 		GL_FALSE,
-		sizeof(float) * 3, 0);
+		sizeof(float) * 6, 0);
+
+	glVertexAttribPointer(attribMass,
+		1, GL_FLOAT,
+		GL_FALSE,
+		sizeof(float) * 6, (GLvoid*)(sizeof(float) * 3));
+
+	glVertexAttribPointer(attribVel,
+		2, GL_FLOAT,
+		GL_FALSE,
+		sizeof(float) * 6, (GLvoid*)(sizeof(float) * 4));
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
