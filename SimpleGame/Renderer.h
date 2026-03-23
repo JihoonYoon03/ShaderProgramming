@@ -6,6 +6,8 @@
 #include <iostream>
 #include <random>
 #include <array>
+#include <windows.h>
+#include <vector>
 
 #include "Dependencies\glew.h"
 
@@ -19,10 +21,12 @@ public:
 	bool IsInitialized();
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawTriangle();
+	void DrawParticles();
 
 private:
 	std::default_random_engine dre{};
 	std::uniform_real_distribution<float> urd{-3.f, 3.f};
+	std::uniform_real_distribution<float> urd0_1{ 0.f, 1.f };
 
 	void Initialize(int windowSizeX, int windowSizeY);
 	bool ReadFile(char* filename, std::string *target);
@@ -44,5 +48,7 @@ private:
 
 	GLuint	m_VBOParticles = 0;
 	int		numParticles = 1000;
+
+	LARGE_INTEGER t_frequency, t_start, t_end;
 };
 

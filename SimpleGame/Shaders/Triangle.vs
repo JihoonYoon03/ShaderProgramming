@@ -5,6 +5,8 @@ uniform float u_Time;
 in vec3 a_Position;
 in float a_Mass;
 in vec2 a_Vel;
+in float a_RV0;
+in float a_RV1;
 
 const float c_PI = 3.141592;
 const float c_G = -9.8;
@@ -95,7 +97,46 @@ void Falling()
     gl_Position = newPos;
 }
 
+// AI
+// --- Pseudo Random Generator 함수 추가 ---
+// vec2를 시드로 받아 0.0 ~ 1.0 사이의 float 난수를 생성합니다.
+float Hash(vec2 seed)
+{
+    return fract(sin(dot(seed, vec2(12.9898, 78.233))) * 43758.5453123);
+}
+
+void Falling_circle()
+{
+    float startTime = a_RV1;
+    float newTime = u_Time - startTime;
+
+    if (newTime > 0)
+    {
+        float t = mod(newTime, 1.0);
+        float tt = t * t;
+        float vx, vy;
+        float sx, sy;
+        vx = a_Vel.x / 3;
+        vy = a_Vel.y / 3;
+
+        vec4 newPos;
+        sx = a_Position.x * Hash(a_Vel) + sin(c_PI * 2 * a_RV0);
+        sy = a_Position.y * Hash(a_Vel) + cos(c_PI * 2 * a_RV0);
+
+        newPos.x = sx + vx * t * a_RV0;
+        newPos.y = sy + vy * t + 0.5 * c_G * tt;
+        newPos.z = 0;
+        newPos.w = 1;
+
+        gl_Position = newPos;
+    }
+    else
+    {
+        gl_Position = vec4(-1000, 0, 0, 0);
+    }
+}
+
 void main()
 {
-    Falling();
+    Falling_circle();
 }
