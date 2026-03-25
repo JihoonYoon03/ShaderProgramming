@@ -27,6 +27,7 @@ private:
 	std::default_random_engine dre{};
 	std::uniform_real_distribution<float> urd{-3.f, 3.f};
 	std::uniform_real_distribution<float> urd0_1{ 0.f, 1.f };
+	std::uniform_real_distribution<float> urd2_5{ 2.f, 5.f };
 
 	void Initialize(int windowSizeX, int windowSizeY);
 	bool ReadFile(char* filename, std::string *target);
@@ -47,7 +48,7 @@ private:
 	GLuint	m_TriangleShader = 0;
 
 	GLuint	m_VBOParticles = 0;
-	int		numParticles = 1000;
+	int		numParticles = 500;
 
 	LARGE_INTEGER t_frequency, t_start, t_end;
 };

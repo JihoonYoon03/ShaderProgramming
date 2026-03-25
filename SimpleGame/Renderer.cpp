@@ -101,27 +101,28 @@ void Renderer::CreateVertexBufferObjects()
 	size = 0.05f;
 
 	for (int i = 0; i < numParticles; ++i) {
-		float vx_ = urd0_1(dre);
-		float vy_ = urd0_1(dre);
+		float vx_ = urd(dre);
+		float vy_ = urd(dre);
 
 		float RV0 = urd0_1(dre);
 		float RV1 = urd0_1(dre);
+		float RV2 = urd0_1(dre);
 
 		float newParticle[] =
 		{
 			centerX - size / 2, centerY - size / 2, 0.f,
-			mass, vx_, vy_, RV0, RV1,
+			mass, vx_, vy_, RV0, RV1, RV2,
 			centerX + size / 2, centerY - size / 2, 0.f,
-			mass, vx_, vy_, RV0, RV1,
+			mass, vx_, vy_, RV0, RV1, RV2,
 			centerX + size / 2, centerY + size / 2, 0.f,
-			mass, vx_, vy_, RV0, RV1,	// Triangle 1
+			mass, vx_, vy_, RV0, RV1, RV2,	// Triangle 1
 
 			centerX - size / 2, centerY - size / 2, 0.f,
-			mass, vx_, vy_, RV0, RV1,
+			mass, vx_, vy_, RV0, RV1, RV2,
 			centerX + size / 2, centerY + size / 2, 0.f,
-			mass, vx_, vy_, RV0, RV1,
+			mass, vx_, vy_, RV0, RV1, RV2,
 			centerX - size / 2, centerY + size / 2, 0.f,
-			mass, vx_, vy_, RV0, RV1	// Triangle 2
+			mass, vx_, vy_, RV0, RV1, RV2	// Triangle 2
 		};
 
 		glBufferSubData(GL_ARRAY_BUFFER, sizeof(newParticle) * i, sizeof(newParticle), newParticle);
@@ -328,38 +329,45 @@ void Renderer::DrawParticles()
 	int attribVel = glGetAttribLocation(m_TriangleShader, "a_Vel");
 	int attribRV0 = glGetAttribLocation(m_TriangleShader, "a_RV0");
 	int attribRV1 = glGetAttribLocation(m_TriangleShader, "a_RV1");
+	int attribRV2 = glGetAttribLocation(m_TriangleShader, "a_RV2");
 	glEnableVertexAttribArray(attribPosition);
 	glEnableVertexAttribArray(attribMass);
 	glEnableVertexAttribArray(attribVel);
 	glEnableVertexAttribArray(attribRV0);
 	glEnableVertexAttribArray(attribRV1);
+	glEnableVertexAttribArray(attribRV2);
 
 	// DX12 Root Signature처럼 Vertex shader 입력에 맞게 수정
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
 	glVertexAttribPointer(attribPosition,
 		3, GL_FLOAT,
 		GL_FALSE,
-		sizeof(float) * 8, 0);
+		sizeof(float) * 9, 0);
 
 	glVertexAttribPointer(attribMass,
 		1, GL_FLOAT,
 		GL_FALSE,
-		sizeof(float) * 8, (GLvoid*)(sizeof(float) * 3));
+		sizeof(float) * 9, (GLvoid*)(sizeof(float) * 3));
 
 	glVertexAttribPointer(attribVel,
 		2, GL_FLOAT,
 		GL_FALSE,
-		sizeof(float) * 8, (GLvoid*)(sizeof(float) * 4));
+		sizeof(float) * 9, (GLvoid*)(sizeof(float) * 4));
 
 	glVertexAttribPointer(attribRV0,
 		1, GL_FLOAT,
 		GL_FALSE,
-		sizeof(float) * 8, (GLvoid*)(sizeof(float) * 6));
+		sizeof(float) * 9, (GLvoid*)(sizeof(float) * 6));
 
 	glVertexAttribPointer(attribRV1,
 		1, GL_FLOAT,
 		GL_FALSE,
-		sizeof(float) * 8, (GLvoid*)(sizeof(float) * 7));
+		sizeof(float) * 9, (GLvoid*)(sizeof(float) * 7));
+
+	glVertexAttribPointer(attribRV2,
+		1, GL_FLOAT,
+		GL_FALSE,
+		sizeof(float) * 9, (GLvoid*)(sizeof(float) * 8));
 
 	glDrawArrays(GL_TRIANGLES, 0, 6 * numParticles);
 
@@ -368,6 +376,7 @@ void Renderer::DrawParticles()
 	glDisableVertexAttribArray(attribVel);
 	glDisableVertexAttribArray(attribRV0);
 	glDisableVertexAttribArray(attribRV1);
+	glDisableVertexAttribArray(attribRV2);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
