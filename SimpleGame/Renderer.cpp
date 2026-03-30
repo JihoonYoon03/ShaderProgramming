@@ -28,6 +28,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 	m_TriangleShader = CompileShaders("./Shaders/Triangle.vs", "./Shaders/Triangle.fs");
+	m_FSShader = CompileShaders("./Shaders/FS.vs", "./Shaders/FS.fs");
 
 	//Create VBOs
 	CreateVertexBufferObjects();
@@ -126,6 +127,23 @@ void Renderer::CreateVertexBufferObjects()
 		};
 
 		glBufferSubData(GL_ARRAY_BUFFER, sizeof(newParticle) * i, sizeof(newParticle), newParticle);
+
+		// x, y, z, tx, ty
+		float rectFull[]
+			=
+		{
+			-1.f, -1.f, 0.f, 0.f, 1.f,
+			1.f, 1.f, 0.f, 1.f, 0.f,
+			-1.f, 1.f, 0.f, 0.f, 0.f, //Triangle1
+
+			-1.f, -1.f, 0.f, 0.f, 1.f,
+			1.f, -1.f, 0.f, 1.f, 1.f,
+			1.f, 1.f, 0.f, 1.f, 0.f,	//Triangle2
+		};
+
+		glGenBuffers(1, &m_VBOFS);
+		glBindBuffer(GL_ARRAY_BUFFER, m_VBOFS);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(rectFull), rectFull, GL_STATIC_DRAW);
 	}
 }
 
@@ -265,7 +283,9 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 
 float g_time = 0;
 
+//=======================
 void Renderer::DrawTriangle()
+//=======================
 {
 	g_time += 0.001;
 
@@ -308,7 +328,9 @@ void Renderer::DrawTriangle()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+//=======================
 void Renderer::DrawParticles()
+//=======================
 {
 	QueryPerformanceCounter(&t_end);
 
@@ -377,6 +399,45 @@ void Renderer::DrawParticles()
 	glDisableVertexAttribArray(attribRV0);
 	glDisableVertexAttribArray(attribRV1);
 	glDisableVertexAttribArray(attribRV2);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+//======================= 프래그먼트 셰이더 테스트용 함수
+void Renderer::DrawFS()
+//=======================
+{
+	QueryPerformanceCounter(&t_end);
+
+	double elapsed = static_cast<double>(t_end.QuadPart - t_start.QuadPart) / t_frequency.QuadPart;
+
+	QueryPerformanceCounter(&t_start);
+
+	g_time += elapsed;
+
+	GLuint shader = m_FSShader;
+	glUseProgram(shader);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Pos");
+	int attribTPos = glGetAttribLocation(shader, "a_TPos");
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribTPos);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBOFS);
+	glVertexAttribPointer(attribPosition,
+		3, GL_FLOAT,
+		GL_FALSE,
+		sizeof(float) * 5, 0);
+	
+	glVertexAttribPointer(attribTPos,
+		2, GL_FLOAT,
+		GL_FALSE,
+		sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribTPos);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

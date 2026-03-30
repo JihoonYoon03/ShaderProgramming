@@ -22,6 +22,7 @@ public:
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawTriangle();
 	void DrawParticles();
+	void DrawFS();
 
 private:
 	std::default_random_engine dre{};
@@ -49,6 +50,9 @@ private:
 
 	GLuint	m_VBOParticles = 0;
 	int		numParticles = 500;
+
+	GLuint	m_VBOFS = 0;
+	GLuint	m_FSShader = 0;
 
 	LARGE_INTEGER t_frequency, t_start, t_end;
 };
