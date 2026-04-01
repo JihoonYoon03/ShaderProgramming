@@ -418,6 +418,9 @@ void Renderer::DrawFS()
 	GLuint shader = m_FSShader;
 	glUseProgram(shader);
 
+	int uTime = glGetUniformLocation(shader, "u_Time");
+	glUniform1f(uTime, g_time);
+
 	int attribPosition = glGetAttribLocation(shader, "a_Pos");
 	int attribTPos = glGetAttribLocation(shader, "a_TPos");
 	glEnableVertexAttribArray(attribPosition);
