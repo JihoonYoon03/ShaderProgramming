@@ -6,6 +6,8 @@ in vec2 v_TPos;
 
 uniform float u_Time;
 
+uniform vec4 u_DropInfo[1000];  // (x, y, sT, lT)
+
 const float c_PI = 3.141592;
 
 void Test()
@@ -164,10 +166,41 @@ void AIContinuousInfiniteZoom()
     FragColor = vec4(finalColor, 1.0);
 }
 
+void RainDrop()
+{
+    float accum = 0;
+
+    for (int i = 0; i < 1000; ++i) {
+        float lTime = u_DropInfo[i].w;
+        float sTime = u_DropInfo[i].z;
+        float newTime = u_Time - sTime;
+    
+        if (newTime > 0) {
+            newTime = fract(newTime / lTime);
+            float oneMinus = 1 - newTime;
+            float t = newTime * lTime;
+
+	        vec2 center = u_DropInfo[i].xy;
+	        vec2 currPos = v_TPos.xy;
+	        float d = distance(center, currPos);
+
+            float range = t / 10;
+            float fade = 50 * clamp(range - d, 0, 1);
+
+	        float value = pow(abs(sin(d * c_PI * 4 * 10 - t * 15)), 16);
+
+	        accum += value * fade * oneMinus;
+        }
+        else {
+        }
+    }
+    FragColor = vec4(accum);
+}
+
 void main()
 {
 	//CircleSin();
-	AIFractalJulia();
-    //AIContinuousInfiniteZoom();
-    
+	//AIFractalJulia();
+    //RainDrop();
+    AIRainDrop();
 }

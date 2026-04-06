@@ -55,5 +55,8 @@ private:
 	GLuint	m_FSShader = 0;
 
 	LARGE_INTEGER t_frequency, t_start, t_end;
+
+	//RainDrops
+	float m_DropPoints[1000 * 4];
 };
 
