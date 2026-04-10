@@ -180,7 +180,58 @@ void RainDrop()
     FragColor = vec4(accum);
 }
 
+void Flag()
+{
+    float amp = 0.3;
+    float speed = 15;
+    float sinInput = c_PI * 2 * v_TPos.x - u_Time * speed;
+    // v_TPos.x로 0~1 구간별로 값 보정
+    float sinValue = v_TPos.x * amp * (((sin(sinInput) + 1) / 2) - 0.5) + 0.5;
+
+    float fWidth = 0.0; // width에 대한 비율
+    float width = 0.7 * (mix(1, fWidth, v_TPos.x));
+    float grey = 0;
+
+    if (v_TPos.y < sinValue + width / 2 && v_TPos.y > sinValue - width / 2) {
+        grey = 1;
+    }
+    else {
+        grey = 0;
+        discard;
+    }
+
+    FragColor = vec4(grey);
+}
+
+void Smoke()
+{
+    float amp = 0.3;
+    float speed = 5;
+    float newY = 1 - v_TPos.y;
+    float sinInput = c_PI * 2 * newY - u_Time * speed;
+    // v_TPos.y로 0~1 구간별로 값 보정
+    float sinValue = newY * amp * (((sin(sinInput) + 1) / 2) - 0.5) + 0.5;
+
+    float fWidth = 0.0; // width에 대한 비율
+    float width = 0.5 * (mix(fWidth, 1, newY));
+    float grey = 0;
+
+    if (v_TPos.x < sinValue + width / 2 && v_TPos.x > sinValue - width / 2) {
+        grey = 1;
+    }
+    else {
+        grey = 0;
+        discard;
+    }
+
+    grey *= v_TPos.y;
+
+    FragColor = vec4(grey);
+}
+
 void main()
 {
-    RainDrop();
+    // RainDrop();
+    //Flag();
+    Smoke();
 }
