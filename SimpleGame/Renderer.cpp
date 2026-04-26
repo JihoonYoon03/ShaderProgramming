@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Renderer.h"
+#include "LoadPng.h"
+#include <assert.h>
 
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
@@ -30,6 +32,15 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_TriangleShader = CompileShaders("./Shaders/Triangle.vs", "./Shaders/Triangle.fs");
 	m_FSShader = CompileShaders("./Shaders/FS.vs", "./Shaders/FS.fs");
 
+	//Load Textures;
+	m_RgbTexture = CreatePngTexture ("./Textures/rgb.png", GL_NEAREST );
+	m_NumsTexture = CreatePngTexture ("./Textures/numbers.png", GL_NEAREST );
+
+	for ( int i = 0; i < 10; ++i ) {
+		std::string path = "./Textures/" + std::to_string ( i ) + ".png";
+		m_NumTexture[i] = CreatePngTexture ((char*)path.c_str() , GL_NEAREST );
+	}
+
 	//Create VBOs
 	CreateVertexBufferObjects();
 
@@ -52,6 +63,31 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	}
 }
 
+GLuint Renderer::CreatePngTexture ( char* filePath , GLuint samplingMethod )
+{
+	//Load Png
+	std::vector<unsigned char> image;
+
+	unsigned width , height;
+	unsigned error = lodepng::decode ( image , width , height , filePath );
+
+	if ( error != 0 )
+	{
+		std::cout << "PNG image loading failed:" << filePath << std::endl;
+		assert ( 0 );
+	}
+
+	GLuint temp;
+	glGenTextures ( 1 , &temp );
+	glBindTexture ( GL_TEXTURE_2D , temp );
+	glTexImage2D ( GL_TEXTURE_2D , 0 , GL_RGBA , width , height , 0 , GL_RGBA , GL_UNSIGNED_BYTE , &image[ 0 ] );
+
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , samplingMethod );
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , samplingMethod );
+
+	return temp;
+}
+
 bool Renderer::IsInitialized()
 {
 	return m_Initialized;
@@ -71,7 +107,7 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
 
-	// ì •ì  1ê°œ = x, y, z, mass, vx, vy, RV0, RV1 -> ì´ 8ê°œ float
+	// Á¤Á¡ 1°³ = x, y, z, mass, vx, vy, RV0, RV1 -> ÃÑ 8°³ float
 	float centerX = 0;
 	float centerY = 0;
 	float size = 0.1;
@@ -99,15 +135,15 @@ void Renderer::CreateVertexBufferObjects()
 		mass, vx, vy	// Triangle 2
 	};
 
-	// VBO ì•„ì´ë”” ì§€ì • ë° ë°”ì¸ë”©
+	// VBO ¾ÆÀÌµğ ÁöÁ¤ ¹× ¹ÙÀÎµù
 	glGenBuffers(1, &m_VBOTriangle);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTriangle);
 
-	// glBufferDataì—ì„œ m_VBOTriangleì— ì‹¤ì œ ë©”ëª¨ë¦¬ ì£¼ì†Œ ì €ì¥í•œë‹¤ê³  ë³´ë©´ ë¨
-	// ë™ê¸°ì‹ìœ¼ë¡œ ì‘ë™. ë°ì´í„° ì˜¬ë¼ê°ˆ ë•Œ ê¹Œì§€ ê¸°ë‹¤ë¦¼
+	// glBufferData¿¡¼­ m_VBOTriangle¿¡ ½ÇÁ¦ ¸Ş¸ğ¸® ÁÖ¼Ò ÀúÀåÇÑ´Ù°í º¸¸é µÊ
+	// µ¿±â½ÄÀ¸·Î ÀÛµ¿. µ¥ÀÌÅÍ ¿Ã¶ó°¥ ¶§ ±îÁö ±â´Ù¸²
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
 
-	// VBO ì•„ì´ë”” ì§€ì • ë° ë°”ì¸ë”©
+	// VBO ¾ÆÀÌµğ ÁöÁ¤ ¹× ¹ÙÀÎµù
 	glGenBuffers(1, &m_VBOParticles);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle) * numParticles, nullptr, GL_STATIC_DRAW);
@@ -162,7 +198,6 @@ void Renderer::CreateVertexBufferObjects()
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
 {
-	//ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
 	GLuint ShaderObj = glCreateShader(ShaderType);
 
 	if (ShaderObj == 0) {
@@ -173,25 +208,20 @@ void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum S
 	p[0] = pShaderText;
 	GLint Lengths[1];
 	Lengths[0] = strlen(pShaderText);
-	//ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½Úµå¸¦ ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Ò´ï¿½
 	glShaderSource(ShaderObj, 1, p, Lengths);
 
-	//ï¿½Ò´ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½Úµå¸¦ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	glCompileShader(ShaderObj);
 
 	GLint success;
-	// ShaderObj ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
 	glGetShaderiv(ShaderObj, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		GLchar InfoLog[1024];
 
-		//OpenGL ï¿½ï¿½ shader log ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		glGetShaderInfoLog(ShaderObj, 1024, NULL, InfoLog);
 		fprintf(stderr, "Error compiling shader type %d: '%s'\n", ShaderType, InfoLog);
 		printf("%s \n", pShaderText);
 	}
 
-	// ShaderProgram ï¿½ï¿½ attach!!
 	glAttachShader(ShaderProgram, ShaderObj);
 }
 
@@ -214,43 +244,36 @@ bool Renderer::ReadFile(char* filename, std::string* target)
 
 GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 {
-	GLuint ShaderProgram = glCreateProgram(); //ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½Î±×·ï¿½ ï¿½ï¿½ï¿½ï¿½
+	GLuint ShaderProgram = glCreateProgram();
 
-	if (ShaderProgram == 0) { //ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½Î±×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
+	if (ShaderProgram == 0) {
 		fprintf(stderr, "Error creating shader program\n");
 	}
 
 	std::string vs, fs;
 
-	//shader.vs ï¿½ï¿½ vs ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ï¿½ï¿½
 	if (!ReadFile(filenameVS, &vs)) {
 		printf("Error compiling vertex shader\n");
 		return -1;
 	};
 
-	//shader.fs ï¿½ï¿½ fs ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ï¿½ï¿½
 	if (!ReadFile(filenameFS, &fs)) {
 		printf("Error compiling fragment shader\n");
 		return -1;
 	};
 
-	// ShaderProgram ï¿½ï¿½ vs.c_str() ï¿½ï¿½ï¿½Ø½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ attachï¿½ï¿½
 	AddShader(ShaderProgram, vs.c_str(), GL_VERTEX_SHADER);
 
-	// ShaderProgram ï¿½ï¿½ fs.c_str() ï¿½ï¿½ï¿½ï¿½ï¿½×¸ï¿½Æ® ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ attachï¿½ï¿½
 	AddShader(ShaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
 
 	GLint Success = 0;
 	GLchar ErrorLog[1024] = { 0 };
 
-	//Attach ï¿½Ï·ï¿½ï¿½ shaderProgram ï¿½ï¿½ ï¿½ï¿½Å·ï¿½ï¿½
 	glLinkProgram(ShaderProgram);
 
-	//ï¿½ï¿½Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ß´ï¿½ï¿½ï¿½ È®ï¿½ï¿½
 	glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &Success);
 
 	if (Success == 0) {
-		// shader program ï¿½Î±×¸ï¿½ ï¿½Ş¾Æ¿ï¿½
 		glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
 		std::cout << filenameVS << ", " << filenameFS << " Error linking shader program\n" << ErrorLog;
 		return -1;
@@ -315,7 +338,7 @@ void Renderer::DrawTriangle()
 	glEnableVertexAttribArray(attribMass);
 	glEnableVertexAttribArray(attribVel);
 
-	// DX12 Root Signatureì²˜ëŸ¼ Vertex shader ì…ë ¥ì— ë§ê²Œ ìˆ˜ì •
+	// DX12 Root SignatureÃ³·³ Vertex shader ÀÔ·Â¿¡ ¸Â°Ô ¼öÁ¤
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTriangle);
 	glVertexAttribPointer(attribPosition,
 		3, GL_FLOAT,
@@ -372,7 +395,7 @@ void Renderer::DrawParticles()
 	glEnableVertexAttribArray(attribRV1);
 	glEnableVertexAttribArray(attribRV2);
 
-	// DX12 Root Signatureì²˜ëŸ¼ Vertex shader ì…ë ¥ì— ë§ê²Œ ìˆ˜ì •
+	// DX12 Root SignatureÃ³·³ Vertex shader ÀÔ·Â¿¡ ¸Â°Ô ¼öÁ¤
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
 	glVertexAttribPointer(attribPosition,
 		3, GL_FLOAT,
@@ -416,7 +439,7 @@ void Renderer::DrawParticles()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-//======================= í”„ë˜ê·¸ë¨¼íŠ¸ ì…°ì´ë” í…ŒìŠ¤íŠ¸ìš© í•¨ìˆ˜
+//======================= ÇÁ·¡±×¸ÕÆ® ¼ÎÀÌ´õ Å×½ºÆ®¿ë ÇÔ¼ö
 void Renderer::DrawFS()
 //=======================
 {
@@ -433,6 +456,12 @@ void Renderer::DrawFS()
 
 	int uTime = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTime, g_time);
+	
+	int uRGBTexture = glGetUniformLocation ( shader , "u_RGBTex" );
+	glUniform1i ( uRGBTexture , 0 );
+	glActiveTexture ( 0 );
+	glBindTexture ( GL_TEXTURE_2D , m_RgbTexture );
+
 	int uPoints = glGetUniformLocation(shader, "u_DropInfo");
 	glUniform4fv(uPoints, 1000, m_DropPoints);
 

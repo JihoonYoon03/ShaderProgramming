@@ -23,6 +23,7 @@ public:
 	void DrawTriangle();
 	void DrawParticles();
 	void DrawFS();
+	GLuint CreatePngTexture ( char* filePath , GLuint samplingMethod );
 
 private:
 	std::default_random_engine dre{};
@@ -58,5 +59,10 @@ private:
 
 	//RainDrops
 	float m_DropPoints[1000 * 4];
+
+	//Textures
+	GLuint m_RgbTexture;
+	GLuint m_NumTexture[ 10 ];
+	GLuint m_NumsTexture;
 };
 
