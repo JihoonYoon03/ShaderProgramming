@@ -3,9 +3,12 @@
 layout(location=0) out vec4 FragColor;
 
 uniform sampler2D u_RGBTex;
+uniform sampler2D u_CurrNumTex;
+uniform sampler2D u_NumsTex;
 in vec2 v_TPos;
 
 uniform float u_Time;
+uniform int u_InputNum;
 
 uniform vec4 u_DropInfo[1000];
 // (x, y, sT, lT)
@@ -41,7 +44,7 @@ void Pattern()
 	float greyX = pow(abs(sin(v_TPos.x * c_PI * 2 * lineCountV - per)), lineWidth);
 	float greyY = pow(abs(sin(v_TPos.y * c_PI * 2 * lineCountH - per)), lineWidth);
 	
-	// ìœ„ì™€ ë™ì¼
+	// À§¿Í µ¿ÀÏ
 	// float greyX = pow(abs(cos(v_TPos.x * c_PI * 2 * lineCountH)), lineWidth);
 	// float greyY = pow(abs(cos(v_TPos.y * c_PI * 2 * lineCountV)), lineWidth);
 
@@ -81,29 +84,29 @@ void CircleSin()
 
 void AIFractalJulia()
 {
-    // 1. ì¢Œí‘œê³„ ì„¤ì •: v_TPos(0~1)ë¥¼ NDC ë²”ìœ„(-1.5~1.5) ì •ë„ë¡œ í™•ì¥ ë° ì¤‘ì‹¬ ì´ë™
+    // 1. ÁÂÇ¥°è ¼³Á¤: v_TPos(0~1)¸¦ NDC ¹üÀ§(-1.5~1.5) Á¤µµ·Î È®Àå ¹× Áß½É ÀÌµ¿
     vec2 z = (v_TPos * 2.0 - 1.0) * 1.5;
 
-    // 2. Julia Setì˜ ëª¨ì–‘ì„ ê²°ì •í•˜ëŠ” ìƒìˆ˜ C
-    // ì‹œê°„ì— ë”°ë¼ ë³€í™”ë¥¼ ì£¼ì–´ ë¬¸ì–‘ì´ ê³„ì† ì›€ì§ì´ê²Œ ë§Œë“­ë‹ˆë‹¤.
+    // 2. Julia SetÀÇ ¸ğ¾çÀ» °áÁ¤ÇÏ´Â »ó¼ö C
+    // ½Ã°£¿¡ µû¶ó º¯È­¸¦ ÁÖ¾î ¹®¾çÀÌ °è¼Ó ¿òÁ÷ÀÌ°Ô ¸¸µì´Ï´Ù.
     vec2 c = vec2(sin(u_Time * 0.5) * 0.4 - 0.1, cos(u_Time * 0.3) * 0.4 + 0.1);
     float iter = 0.0;
-    const float maxIter = 64.0; // ë°˜ë³µ íšŸìˆ˜ê°€ ë†’ì„ìˆ˜ë¡ ì •êµí•´ì§‘ë‹ˆë‹¤.
+    const float maxIter = 64.0; // ¹İº¹ È½¼ö°¡ ³ôÀ»¼ö·Ï Á¤±³ÇØÁı´Ï´Ù.
 
-    // 3. í”„ë™íƒˆ ë°˜ë³µ ê³„ì‚°: z = z^2 + c
+    // 3. ÇÁ·¢Å» ¹İº¹ °è»ê: z = z^2 + c
     for(float i = 0.0; i < maxIter; i++) {
         float x = (z.x * z.x - z.y * z.y) + c.x;
         float y = (2.0 * z.x * z.y) + c.y;
         
         z = vec2(x, y);
-        // ë°œì‚° ì²´í¬ (ê±°ë¦¬ê°€ 2ë¥¼ ë„˜ìœ¼ë©´ í”„ë™íƒˆ ì§‘í•©ì—ì„œ ë²—ì–´ë‚¨)
+        // ¹ß»ê Ã¼Å© (°Å¸®°¡ 2¸¦ ³ÑÀ¸¸é ÇÁ·¢Å» ÁıÇÕ¿¡¼­ ¹ş¾î³²)
         if(length(z) > 2.0) break;
         iter++;
     }
     
-    // 4. íƒˆì¶œ ì†ë„(iter)ì— ë”°ë¥¸ ìƒ‰ìƒ ê²°ì •
+    // 4. Å»Ãâ ¼Óµµ(iter)¿¡ µû¸¥ »ö»ó °áÁ¤
     if(iter == maxIter) {
-        FragColor = vec4(0.0, 0.0, 0.0, 1.0); // ì§‘í•© ë‚´ë¶€: ì–´ë‘ìš´ ìƒ‰
+        FragColor = vec4(0.0, 0.0, 0.0, 1.0); // ÁıÇÕ ³»ºÎ: ¾îµÎ¿î »ö
     } else {
         float f = iter / maxIter;
         vec3 color = vec3(
@@ -117,21 +120,21 @@ void AIFractalJulia()
 
 void AIContinuousInfiniteZoom()
 {
-    // 1. ì¢Œí‘œ ì •ê·œí™” (-1.0 ~ 1.0)
+    // 1. ÁÂÇ¥ Á¤±ÔÈ­ (-1.0 ~ 1.0)
     vec2 uv = v_TPos * 2.0 - 1.0;
     vec3 finalColor = vec3(0.0);
-    float time = u_Time * 0.5; // ì „ì²´ì ì¸ ì†ë„ ì¡°ì ˆ
+    float time = u_Time * 0.5; // ÀüÃ¼ÀûÀÎ ¼Óµµ Á¶Àı
     
-    // 2. ë‹¤ì¤‘ ë ˆì´ì–´ ë¸”ë Œë”© (3ê°œ ë ˆì´ì–´)
+    // 2. ´ÙÁß ·¹ÀÌ¾î ºí·»µù (3°³ ·¹ÀÌ¾î)
     for(int i = 0; i < 3; i++) {
         float layerOffset = float(i);
         float f = fract(time + layerOffset / 3.0); 
         
-        // ì§€ìˆ˜ì  ì¤Œ
+        // Áö¼öÀû ÁÜ
         float zoom = pow(8.0, 1.0 - f);
         vec2 uvLayer = uv * zoom;
         
-        // 3. ê¸°í•˜í•™ì  í˜•íƒœ ìƒì„±
+        // 3. ±âÇÏÇĞÀû ÇüÅÂ »ı¼º
         float angle = time * 0.2 + layerOffset;
         float s = sin(angle), c = cos(angle);
         mat2 rot = mat2(c, -s, s, c);
@@ -141,12 +144,12 @@ void AIContinuousInfiniteZoom()
             uvLayer *= 1.2;
         }
         
-        // 4. ì„ ëª…ë„ ë° íˆ¬ëª…ë„ ê³„ì‚°
+        // 4. ¼±¸íµµ ¹× Åõ¸íµµ °è»ê
         float opacity = sin(f * c_PI);
         float dist = length(uvLayer);
         float line = 0.01 / abs(sin(dist * 3.0 + time));
         
-        // 5. ìƒ‰ìƒ ì¡°í•©
+        // 5. »ö»ó Á¶ÇÕ
         vec3 col = 0.5 + 0.5 * cos(time + vec3(0, 2, 4) + layerOffset);
         finalColor += col * line * opacity;
     }
@@ -186,10 +189,10 @@ void Flag()
     float amp = 0.3;
     float speed = 15;
     float sinInput = c_PI * 2 * v_TPos.x - u_Time * speed;
-    // v_TPos.xë¡œ 0~1 êµ¬ê°„ë³„ë¡œ ê°’ ë³´ì •
+    // v_TPos.x·Î 0~1 ±¸°£º°·Î °ª º¸Á¤
     float sinValue = v_TPos.x * amp * (((sin(sinInput) + 1) / 2) - 0.5) + 0.5;
 
-    float fWidth = 0.0; // widthì— ëŒ€í•œ ë¹„ìœ¨
+    float fWidth = 0.0; // width¿¡ ´ëÇÑ ºñÀ²
     float width = 0.7 * (mix(1, fWidth, v_TPos.x));
     float grey = 0;
 
@@ -210,10 +213,10 @@ void Smoke()
     float speed = 5;
     float newY = 1 - v_TPos.y;
     float sinInput = c_PI * 2 * newY - u_Time * speed;
-    // v_TPos.yë¡œ 0~1 êµ¬ê°„ë³„ë¡œ ê°’ ë³´ì •
+    // v_TPos.y·Î 0~1 ±¸°£º°·Î °ª º¸Á¤
     float sinValue = newY * amp * (((sin(sinInput) + 1) / 2) - 0.5) + 0.5;
 
-    float fWidth = 0.0; // widthì— ëŒ€í•œ ë¹„ìœ¨
+    float fWidth = 0.0; // width¿¡ ´ëÇÑ ºñÀ²
     float width = 0.5 * (mix(fWidth, 1, newY));
     float grey = 0;
 
@@ -283,7 +286,87 @@ void TextureQ3()
 	FragColor = texture(u_RGBTex, newTex);
 }
 
+void TextureQ4()
+{
+    float resX = 5;
+    float resY = 5;
+    float shear = 0.5 * u_Time;
+
+    float offsetX = fract(ceil(v_TPos.y * resY) * shear);  // offset
+    float offsetY = 0;
+
+    float tx = fract(v_TPos.x * resX + offsetX);  // range
+    float ty = fract(v_TPos.y * resY + offsetY);
+
+    vec2 newTex = vec2(tx, ty);
+    FragColor = texture(u_RGBTex, newTex);
+}
+
+void Num()
+{
+	float tx = v_TPos.x;
+	float ty = v_TPos.y;
+
+	float offsetX = 0;
+	float offsetY = 0;
+
+	vec2 newTex = vec2(tx + offsetX, ty + offsetY);
+	FragColor = texture(u_CurrNumTex, newTex);
+}
+
+void Nums()
+{
+    int index = u_InputNum;
+	float tx = v_TPos.x / 5;
+	float ty = v_TPos.y / 2;
+
+	float offsetX = fract(index / 5.0);
+	float offsetY = fract(floor(index / 5.0) / 2.0);
+
+	vec2 newTex = vec2(tx + offsetX, ty + offsetY);
+	FragColor = texture(u_NumsTex, newTex);
+}
+
+void NumsAI()
+{
+    // 1. ÀÚ¸´¼ö °è»ê (0ÀÎ °æ¿ì´Â 1ÀÚ¸®·Î Ã³¸®)
+    int num = u_InputNum;
+    int absNum = num < 0 ? -num : num;
+
+    int digitCount = 1;
+    int temp = absNum;
+    while (temp >= 10) {
+        temp /= 10;
+        digitCount++;
+    }
+
+    // 2. v_TPos.x¸¦ ÀÚ¸´¼ö¸¸Å­ ºĞÇÒÇÏ¿©, ÇöÀç ÇÈ¼¿ÀÌ ¾î´À ÀÚ¸®(¿ŞÂÊºÎÅÍ 0¹øÂ°)¿¡ ÀÖ´ÂÁö °è»ê
+    float scaledX = v_TPos.x * float(digitCount);   // 0 ~ digitCount
+    int digitIndex = int(floor(scaledX));           // ¿ŞÂÊ ÀÚ¸´¼öºÎÅÍ 0, 1, 2, ...
+    if (digitIndex >= digitCount) digitIndex = digitCount - 1; // °æ°è º¸Á¤
+    float localX = fract(scaledX);                  // ¼¿ ³»ºÎ 0~1
+
+    // 3. ÇØ´ç ÀÚ¸®ÀÇ ¼ıÀÚ °ª ÃßÃâ
+    //    ex) 1234¿¡¼­ ¿ŞÂÊ(digitIndex=0)Àº 1000ÀÚ¸® ¡æ power = 10^(digitCount-1-digitIndex)
+    int power = 1;
+    for (int i = 0; i < digitCount - 1 - digitIndex; i++) {
+        power *= 10;
+    }
+    int index = (absNum / power) - (absNum / (power * 10)) * 10;  // (absNum / power) % 10
+
+    // 4. ±âÁ¸ Nums ·ÎÁ÷: 0~9 ÅØ½ºÃ³¿¡¼­ ÇØ´ç ¼ıÀÚ ¼¿À» »ùÇÃ¸µ
+    //    °¡·Î 5Ä­, ¼¼·Î 2Ä­ ±×¸®µå. °¡·Î ¹æÇâ¸¸ localX·Î ±³Ã¼.
+    float tx = localX / 5.0;
+    float ty = v_TPos.y / 2.0;
+
+    float offsetX = fract(float(index) / 5.0);
+    float offsetY = fract(floor(float(index) / 5.0) / 2.0);
+
+    vec2 newTex = vec2(tx + offsetX, ty + offsetY);
+    FragColor = texture(u_NumsTex, newTex);
+}
+
 void main()
 {
-    TextureQ3();
+    NumsAI();
 }

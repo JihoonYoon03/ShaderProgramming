@@ -32,13 +32,13 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_TriangleShader = CompileShaders("./Shaders/Triangle.vs", "./Shaders/Triangle.fs");
 	m_FSShader = CompileShaders("./Shaders/FS.vs", "./Shaders/FS.fs");
 
-	//Load Textures;
-	m_RgbTexture = CreatePngTexture ("./Textures/rgb.png", GL_NEAREST );
-	m_NumsTexture = CreatePngTexture ("./Textures/numbers.png", GL_NEAREST );
+	//Load Textures
+	m_RgbTexture = CreatePngTexture ("./Textures/rgb.png", GL_NEAREST );	// slot 0
+	m_NumsTexture = CreatePngTexture ("./Textures/numbers.png", GL_NEAREST );	// slot 1
 
 	for ( int i = 0; i < 10; ++i ) {
 		std::string path = "./Textures/" + std::to_string ( i ) + ".png";
-		m_NumTexture[i] = CreatePngTexture ((char*)path.c_str() , GL_NEAREST );
+		m_NumTexture[i] = CreatePngTexture ((char*)path.c_str() , GL_NEAREST );	// slot 2~11
 	}
 
 	//Create VBOs
@@ -439,7 +439,9 @@ void Renderer::DrawParticles()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+
 //======================= 프래그먼트 셰이더 테스트용 함수
+int g_CurrNum = 0;
 void Renderer::DrawFS()
 //=======================
 {
@@ -459,8 +461,47 @@ void Renderer::DrawFS()
 	
 	int uRGBTexture = glGetUniformLocation ( shader , "u_RGBTex" );
 	glUniform1i ( uRGBTexture , 0 );
-	glActiveTexture ( 0 );
+
+	int uCurrNumTexture = glGetUniformLocation ( shader , "u_CurrNumTex" );
+	glUniform1i ( uCurrNumTexture , g_CurrNum + 2 );
+	g_CurrNum += 1000;
+	/*if ( ++g_CurrNum > 9 ) {
+		g_CurrNum = 0;
+	}*/
+	//Sleep ( 500 );
+
+	int uInputNum = glGetUniformLocation ( shader , "u_InputNum" );
+	glUniform1i ( uInputNum , g_CurrNum );
+
+	int uNumsTex = glGetUniformLocation ( shader , "u_NumsTex" );
+	glUniform1i ( uNumsTex , 1 );
+
+	glActiveTexture ( GL_TEXTURE0 );
 	glBindTexture ( GL_TEXTURE_2D , m_RgbTexture );
+
+	glActiveTexture ( GL_TEXTURE1 );
+	glBindTexture ( GL_TEXTURE_2D , m_NumsTexture );
+
+	glActiveTexture ( GL_TEXTURE2 );
+	glBindTexture ( GL_TEXTURE_2D , m_NumTexture[0] );
+	glActiveTexture ( GL_TEXTURE3 );
+	glBindTexture ( GL_TEXTURE_2D , m_NumTexture[1] );
+	glActiveTexture ( GL_TEXTURE4 );
+	glBindTexture ( GL_TEXTURE_2D , m_NumTexture[2] );
+	glActiveTexture ( GL_TEXTURE5 );
+	glBindTexture ( GL_TEXTURE_2D , m_NumTexture[3] );
+	glActiveTexture ( GL_TEXTURE6 );
+	glBindTexture ( GL_TEXTURE_2D , m_NumTexture[4] );
+	glActiveTexture ( GL_TEXTURE7 );
+	glBindTexture ( GL_TEXTURE_2D , m_NumTexture[5] );
+	glActiveTexture ( GL_TEXTURE8 );
+	glBindTexture ( GL_TEXTURE_2D , m_NumTexture[6] );
+	glActiveTexture ( GL_TEXTURE9 );
+	glBindTexture ( GL_TEXTURE_2D , m_NumTexture[7] );
+	glActiveTexture ( GL_TEXTURE10 );
+	glBindTexture ( GL_TEXTURE_2D , m_NumTexture[8] );
+	glActiveTexture ( GL_TEXTURE11 );
+	glBindTexture ( GL_TEXTURE_2D , m_NumTexture[9] );
 
 	int uPoints = glGetUniformLocation(shader, "u_DropInfo");
 	glUniform4fv(uPoints, 1000, m_DropPoints);
