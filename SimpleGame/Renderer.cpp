@@ -177,23 +177,24 @@ void Renderer::CreateVertexBufferObjects()
 
 		glBufferSubData(GL_ARRAY_BUFFER, sizeof(newParticle) * i, sizeof(newParticle), newParticle);
 
-		// x, y, z, tx, ty
-		float rectFull[]
-			=
-		{
-			-1.f, -1.f, 0.f, 0.f, 1.f,
-			1.f, 1.f, 0.f, 1.f, 0.f,
-			-1.f, 1.f, 0.f, 0.f, 0.f, //Triangle1
-
-			-1.f, -1.f, 0.f, 0.f, 1.f,
-			1.f, -1.f, 0.f, 1.f, 1.f,
-			1.f, 1.f, 0.f, 1.f, 0.f,	//Triangle2
-		};
-
-		glGenBuffers(1, &m_VBOFS);
-		glBindBuffer(GL_ARRAY_BUFFER, m_VBOFS);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(rectFull), rectFull, GL_STATIC_DRAW);
 	}
+
+	// x, y, z, tx, ty
+	float rectFull[ ]
+		=
+	{
+		-1.f, -1.f, 0.f, 0.f, 1.f,
+		1.f, 1.f, 0.f, 1.f, 0.f,
+		-1.f, 1.f, 0.f, 0.f, 0.f, //Triangle1
+
+		-1.f, -1.f, 0.f, 0.f, 1.f,
+		1.f, -1.f, 0.f, 1.f, 1.f,
+		1.f, 1.f, 0.f, 1.f, 0.f,	//Triangle2
+	};
+
+	glGenBuffers ( 1 , &m_VBOFS );
+	glBindBuffer ( GL_ARRAY_BUFFER , m_VBOFS );
+	glBufferData ( GL_ARRAY_BUFFER , sizeof ( rectFull ) , rectFull , GL_STATIC_DRAW );
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
