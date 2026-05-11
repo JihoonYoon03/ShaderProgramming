@@ -366,7 +366,58 @@ void NumsAI()
     FragColor = texture(u_NumsTex, newTex);
 }
 
+void FS_01_Q6()
+{
+    float tx = fract(v_TPos.x * 3);
+    float ty = v_TPos.y / 3;
+    float offsetX = 0;
+    float offsetY = (3 - floor(v_TPos.x * 3)) / 3;
+
+    FragColor = texture(u_RGBTex, vec2(tx + offsetX, ty + offsetY));
+}
+
+void FS_01_Q7()
+{
+    float tx = v_TPos.x;
+    float ty = fract(v_TPos.y * 3)/3;
+    float offsetX = 0;
+    float offsetY = fract((floor(v_TPos.y * 3) + 1) / 3);
+
+    FragColor = texture(u_RGBTex, vec2(tx + offsetX, ty + offsetY));
+}
+
+void FS_01_Q8()
+{
+    float tx = v_TPos.x / 5;
+    float ty = v_TPos.y / 2;
+    float offsetX = 2 / 5.0;
+    float offsetY = 1 / 2.0;
+
+    FragColor = texture(u_NumsTex, vec2(tx + offsetX, ty + offsetY));
+}
+
+void FS_01_Q9()
+{
+    float tx = v_TPos.x * 2 / 5;
+    float ty = v_TPos.y / 2;
+    float offsetX = 2 / 5.0;
+    float offsetY = 0;
+
+    FragColor = texture(u_NumsTex, vec2(tx + offsetX, ty + offsetY));
+}
+
+void FS_01_Q10()
+{
+    float index = float(8);
+    float tx = v_TPos.x / 5;
+    float ty = v_TPos.y / 2;
+    float offsetX = fract(index / 5.0);
+    float offsetY = floor(index / 5.0) / 2.0;
+
+    FragColor = texture(u_NumsTex, vec2(tx + offsetX, ty + offsetY));
+}
+
 void main()
 {
-    NumsAI();
+    FS_01_Q10();
 }
