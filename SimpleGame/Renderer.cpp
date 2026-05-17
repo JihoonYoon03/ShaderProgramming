@@ -35,6 +35,8 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Load Textures
 	m_RgbTexture = CreatePngTexture ("./Textures/rgb.png", GL_NEAREST );	// slot 0
 	m_NumsTexture = CreatePngTexture ("./Textures/numbers.png", GL_NEAREST );	// slot 1
+	m_ParticleTexture = CreatePngTexture ("./Textures/particle.png", GL_NEAREST );	// slot 1
+	m_ParticleSpriteTexture = CreatePngTexture ("./Textures/explosion.png", GL_NEAREST );	// slot 1
 
 	for ( int i = 0; i < 10; ++i ) {
 		std::string path = "./Textures/" + std::to_string ( i ) + ".png";
@@ -107,7 +109,6 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
 
-	// 정점 1개 = x, y, z, mass, vx, vy, RV0, RV1 -> 총 8개 float
 	float centerX = 0;
 	float centerY = 0;
 	float size = 0.1;
@@ -117,21 +118,26 @@ void Renderer::CreateVertexBufferObjects()
 	// float RV0 = 0;
 	// float RV1 = 0;
 
+	float left = centerX - size / 2.0f;
+	float right = centerX + size / 2.0f;
+	float bottom = centerY - size / 2.0f;
+	float top = centerY + size / 2.0f;
+
 	float triangle[]
 		=
 	{
-		centerX - size / 2, centerY - size / 2, 0.f,
+		left, bottom, 0.f,
 		mass, vx, vy,
-		centerX + size / 2, centerY - size / 2, 0.f,
+		right, bottom, 0.f,
 		mass, vx, vy,
-		centerX + size / 2, centerY + size / 2, 0.f,
+		right, top, 0.f,
 		mass, vx, vy,	// Triangle 1
 
-		centerX - size / 2, centerY - size / 2, 0.f,
+		left, bottom, 0.f,
 		mass, vx, vy,
-		centerX + size / 2, centerY + size / 2, 0.f,
+		right, top, 0.f,
 		mass, vx, vy,
-		centerX - size / 2, centerY + size / 2, 0.f,
+		left, top, 0.f,
 		mass, vx, vy	// Triangle 2
 	};
 
@@ -148,8 +154,9 @@ void Renderer::CreateVertexBufferObjects()
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle) * numParticles, nullptr, GL_STATIC_DRAW);
 	
-	size = 0.05f;
+	size = 0.1f;
 
+	// 정점 1개 = x, y, z, mass, vx, vy, RV0, RV1, RV2, tx, ty, r, g, b -> 총 14개 float
 	for (int i = 0; i < numParticles; ++i) {
 		float vx_ = urd(dre);
 		float vy_ = urd(dre);
@@ -158,21 +165,25 @@ void Renderer::CreateVertexBufferObjects()
 		float RV1 = urd0_1(dre);
 		float RV2 = urd0_1(dre);
 
+		float R = urd0_1 ( dre );
+		float G = urd0_1 ( dre );
+		float B = urd0_1 ( dre );
+
 		float newParticle[] =
 		{
-			centerX - size / 2, centerY - size / 2, 0.f,
-			mass, vx_, vy_, RV0, RV1, RV2,
-			centerX + size / 2, centerY - size / 2, 0.f,
-			mass, vx_, vy_, RV0, RV1, RV2,
-			centerX + size / 2, centerY + size / 2, 0.f,
-			mass, vx_, vy_, RV0, RV1, RV2,	// Triangle 1
+			left, bottom, 0.f,
+			mass, vx_, vy_, RV0, RV1, RV2, 0, 1, R, G, B,
+			right, bottom, 0.f,
+			mass, vx_, vy_, RV0, RV1, RV2, 1, 1, R, G, B,
+			right, top, 0.f,
+			mass, vx_, vy_, RV0, RV1, RV2, 1, 0, R, G, B,	// Triangle 1
 
-			centerX - size / 2, centerY - size / 2, 0.f,
-			mass, vx_, vy_, RV0, RV1, RV2,
-			centerX + size / 2, centerY + size / 2, 0.f,
-			mass, vx_, vy_, RV0, RV1, RV2,
-			centerX - size / 2, centerY + size / 2, 0.f,
-			mass, vx_, vy_, RV0, RV1, RV2	// Triangle 2
+			left, bottom, 0.f,
+			mass, vx_, vy_, RV0, RV1, RV2, 0, 1, R, G, B,
+			right, top, 0.f,
+			mass, vx_, vy_, RV0, RV1, RV2, 1, 0, R, G, B,
+			left, top, 0.f,
+			mass, vx_, vy_, RV0, RV1, RV2, 0, 0, R, G, B		// Triangle 2
 		};
 
 		glBufferSubData(GL_ARRAY_BUFFER, sizeof(newParticle) * i, sizeof(newParticle), newParticle);
@@ -332,7 +343,7 @@ void Renderer::DrawTriangle()
 	int uTime = glGetUniformLocation(m_TriangleShader, "u_Time");
 	glUniform1f(uTime, g_time);
 
-	int attribPosition = glGetAttribLocation(m_TriangleShader, "a_Position");
+	int attribPosition = glGetAttribLocation(m_TriangleShader, "a_Pos");
 	int attribMass = glGetAttribLocation(m_TriangleShader, "a_Mass");
 	int attribVel = glGetAttribLocation(m_TriangleShader, "a_Vel");
 	glEnableVertexAttribArray(attribPosition);
@@ -369,6 +380,9 @@ void Renderer::DrawTriangle()
 void Renderer::DrawParticles()
 //=======================
 {
+	glEnable ( GL_BLEND );
+	glBlendFunc ( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
 	QueryPerformanceCounter(&t_end);
 
 	double elapsed = static_cast<double>(t_end.QuadPart - t_start.QuadPart) / t_frequency.QuadPart;
@@ -383,50 +397,77 @@ void Renderer::DrawParticles()
 	int uTime = glGetUniformLocation(m_TriangleShader, "u_Time");
 	glUniform1f(uTime, g_time);
 
-	int attribPosition = glGetAttribLocation(m_TriangleShader, "a_Position");
+	int uParticle = glGetUniformLocation ( m_TriangleShader , "u_ParticleTex" );
+	glUniform1i ( uParticle , 0 );
+
+	int uParticleSprite = glGetUniformLocation ( m_TriangleShader , "u_ParticleSpriteTex" );
+	glUniform1i ( uParticleSprite , 1 );
+
+	glActiveTexture ( GL_TEXTURE0 );
+	glBindTexture ( GL_TEXTURE_2D , m_ParticleTexture );
+	glActiveTexture ( GL_TEXTURE1 );
+	glBindTexture ( GL_TEXTURE_2D , m_ParticleSpriteTexture );
+
+	int attribPosition = glGetAttribLocation(m_TriangleShader, "a_Pos");
 	int attribMass = glGetAttribLocation(m_TriangleShader, "a_Mass");
 	int attribVel = glGetAttribLocation(m_TriangleShader, "a_Vel");
 	int attribRV0 = glGetAttribLocation(m_TriangleShader, "a_RV0");
 	int attribRV1 = glGetAttribLocation(m_TriangleShader, "a_RV1");
 	int attribRV2 = glGetAttribLocation(m_TriangleShader, "a_RV2");
+	int attribTex = glGetAttribLocation(m_TriangleShader, "a_Tex");
+	int attribRGB = glGetAttribLocation(m_TriangleShader, "a_RGB");
 	glEnableVertexAttribArray(attribPosition);
 	glEnableVertexAttribArray(attribMass);
 	glEnableVertexAttribArray(attribVel);
 	glEnableVertexAttribArray(attribRV0);
 	glEnableVertexAttribArray(attribRV1);
 	glEnableVertexAttribArray(attribRV2);
+	glEnableVertexAttribArray(attribTex);
+	glEnableVertexAttribArray(attribRGB);
+
+	int stride = 14;
 
 	// DX12 Root Signature처럼 Vertex shader 입력에 맞게 수정
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
 	glVertexAttribPointer(attribPosition,
 		3, GL_FLOAT,
 		GL_FALSE,
-		sizeof(float) * 9, 0);
+		sizeof(float) * stride , 0);
 
 	glVertexAttribPointer(attribMass,
 		1, GL_FLOAT,
 		GL_FALSE,
-		sizeof(float) * 9, (GLvoid*)(sizeof(float) * 3));
+		sizeof(float) * stride , (GLvoid*)(sizeof(float) * 3));
 
 	glVertexAttribPointer(attribVel,
 		2, GL_FLOAT,
 		GL_FALSE,
-		sizeof(float) * 9, (GLvoid*)(sizeof(float) * 4));
+		sizeof(float) * stride , (GLvoid*)(sizeof(float) * 4));
 
 	glVertexAttribPointer(attribRV0,
 		1, GL_FLOAT,
 		GL_FALSE,
-		sizeof(float) * 9, (GLvoid*)(sizeof(float) * 6));
+		sizeof(float) * stride , (GLvoid*)(sizeof(float) * 6));
 
 	glVertexAttribPointer(attribRV1,
 		1, GL_FLOAT,
 		GL_FALSE,
-		sizeof(float) * 9, (GLvoid*)(sizeof(float) * 7));
+		sizeof(float) * stride , (GLvoid*)(sizeof(float) * 7));
 
 	glVertexAttribPointer(attribRV2,
 		1, GL_FLOAT,
 		GL_FALSE,
-		sizeof(float) * 9, (GLvoid*)(sizeof(float) * 8));
+		sizeof(float) * stride , (GLvoid*)(sizeof(float) * 8));
+
+	glVertexAttribPointer ( attribTex ,
+		2 , GL_FLOAT,
+		GL_FALSE,
+		sizeof (float) * stride, (GLvoid*) (sizeof(float) * 9));
+
+	glVertexAttribPointer ( attribRGB ,
+		3 , GL_FLOAT ,
+		GL_FALSE ,
+		sizeof ( float ) * stride , ( GLvoid* ) ( sizeof ( float ) * 11 ) );
 
 	glDrawArrays(GL_TRIANGLES, 0, 6 * numParticles);
 
@@ -436,8 +477,12 @@ void Renderer::DrawParticles()
 	glDisableVertexAttribArray(attribRV0);
 	glDisableVertexAttribArray(attribRV1);
 	glDisableVertexAttribArray(attribRV2);
+	glDisableVertexAttribArray(attribTex);
+	glDisableVertexAttribArray(attribRGB);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glDisable ( GL_BLEND );
 }
 
 

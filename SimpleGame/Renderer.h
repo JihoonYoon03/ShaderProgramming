@@ -50,7 +50,7 @@ private:
 	GLuint	m_TriangleShader = 0;
 
 	GLuint	m_VBOParticles = 0;
-	int		numParticles = 500;
+	int		numParticles = 1000;
 
 	GLuint	m_VBOFS = 0;
 	GLuint	m_FSShader = 0;
@@ -61,8 +61,10 @@ private:
 	float m_DropPoints[1000 * 4];
 
 	//Textures
-	GLuint m_RgbTexture;
+	GLuint m_RgbTexture = 0;
 	GLuint m_NumTexture[ 10 ];
-	GLuint m_NumsTexture;
+	GLuint m_NumsTexture = 0;
+	GLuint m_ParticleTexture = 0;
+	GLuint m_ParticleSpriteTexture = 0;
 };
 

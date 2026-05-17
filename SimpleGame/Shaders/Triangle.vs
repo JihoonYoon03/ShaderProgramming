@@ -2,14 +2,18 @@
 
 uniform float u_Time;
 
-in vec3 a_Position;
+in vec3 a_Pos;
 in float a_Mass;
 in vec2 a_Vel;
 in float a_RV0;
 in float a_RV1;
 in float a_RV2;
+in vec2 a_Tex;
+in vec3 a_RGB;
 
 out float v_Grey;
+out vec3 v_Color;
+out vec2 v_Tex;
 
 const float c_PI = 3.141592;
 const float c_G = -9.8;
@@ -38,8 +42,8 @@ void Sin0()
 
         vec4 newPosition;
 
-        newPosition.x = a_Position.x * scale + t * 2 - 1.0f;
-        newPosition.y = a_Position.y * scale + sin(c_PI * 2 * t * frequency) * amplitude;
+        newPosition.x = a_Pos.x * scale + t * 2 - 1.0f;
+        newPosition.y = a_Pos.y * scale + sin(c_PI * 2 * t * frequency) * amplitude;
         newPosition.z = 0.0;
         newPosition.w = 1.0;
 
@@ -57,8 +61,8 @@ void Sin1()
     float t = u_Time;
     vec4 newPosition;
 
-    newPosition.x = a_Position.x + u_Time;
-    newPosition.y = a_Position.y + sin(c_PI * 2 * t) * 0.5f;
+    newPosition.x = a_Pos.x + u_Time;
+    newPosition.y = a_Pos.y + sin(c_PI * 2 * t) * 0.5f;
     newPosition.z = 0.0;
     newPosition.w = 1.0;
 
@@ -71,8 +75,8 @@ void Sin2()
     float freq = 1.f;
     vec4 newPosition;
 
-    newPosition.x = a_Position.x + u_Time - 1.f;
-    newPosition.y = a_Position.y + sin(c_PI * freq * t) * 0.5f;
+    newPosition.x = a_Pos.x + u_Time - 1.f;
+    newPosition.y = a_Pos.y + sin(c_PI * freq * t) * 0.5f;
     newPosition.z = 0.0;
     newPosition.w = 1.0;
 
@@ -85,8 +89,8 @@ void Circle()
     float freq = 1.f;
     vec4 newPosition;
 
-    newPosition.x = a_Position.x + cos(c_PI * freq * t);
-    newPosition.y = a_Position.y + sin(c_PI * freq * t);
+    newPosition.x = a_Pos.x + cos(c_PI * freq * t);
+    newPosition.y = a_Pos.y + sin(c_PI * freq * t);
     newPosition.z = 0.0;
     newPosition.w = 1.0;
 
@@ -108,7 +112,7 @@ void AI_motion()
     float scaleX = 1.0 + 0.4 * abs(sin(t));
     float scaleY = 1.0 - 0.3 * abs(sin(t));
 
-    vec3 pos = a_Position;
+    vec3 pos = a_Pos;
 
     // 스케일 적용
     pos.x *= scaleX;
@@ -135,8 +139,8 @@ void Falling()
         vy = a_Vel.y;
 
         vec4 newPos;
-        newPos.x = a_Position.x * Hash(a_Vel) + vx * t;
-        newPos.y = a_Position.y * Hash(a_Vel) + vy * t + 0.5 * c_G * tt;
+        newPos.x = a_Pos.x * Hash(a_Vel) + vx * t;
+        newPos.y = a_Pos.y * Hash(a_Vel) + vy * t + 0.5 * c_G * tt;
         newPos.z = 0;
         newPos.w = 1;
         gl_Position = newPos;
@@ -164,8 +168,8 @@ void Falling_circle()
         vy = a_Vel.y / 3;
 
         vec4 newPos;
-        sx = a_Position.x * (lifeTime - mod(newTime, lifeTime)) + sin(c_PI * 2 * a_RV0);
-        sy = a_Position.y * (lifeTime - mod(newTime, lifeTime)) + cos(c_PI * 2 * a_RV0);
+        sx = a_Pos.x * (lifeTime - mod(newTime, lifeTime)) + sin(c_PI * 2 * a_RV0);
+        sy = a_Pos.y * (lifeTime - mod(newTime, lifeTime)) + cos(c_PI * 2 * a_RV0);
 
         newPos.x = sx + vx * t * a_RV0;
         newPos.y = sy + vy * t + 0.5 * c_G * tt;
@@ -179,8 +183,33 @@ void Falling_circle()
     }
 }
 
+void Shape()
+{
+    float lifeTime = 0.5 + 5.0 * a_RV0;
+    float startTime = 5.0 * a_RV1;
+
+    float newTime = u_Time - startTime;
+
+    if (newTime > 0) {
+        float t = fract(newTime / lifeTime) * lifeTime;
+        float tt = t*t;
+
+        float newX = a_Pos.x + a_Vel.x * t * 0.1;
+        float newY = a_Pos.y + a_Vel.y * t * 0.1;
+        
+        gl_Position = vec4(newX, newY, 0, 1);
+        v_Grey = 1 - fract(newTime / lifeTime);
+    }
+    else {
+        gl_Position = vec4(-10000, 0, 0, 1);
+        v_Grey = 1;
+    }
+    
+    v_Color = a_RGB;
+    v_Tex = a_Tex;
+}
+
 void main()
 {
-    Falling_circle();
-    v_Grey = 1.0f;
+    Shape();
 }
