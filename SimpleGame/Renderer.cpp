@@ -31,6 +31,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 	m_TriangleShader = CompileShaders("./Shaders/Triangle.vs", "./Shaders/Triangle.fs");
 	m_FSShader = CompileShaders("./Shaders/FS.vs", "./Shaders/FS.fs");
+	m_DummyShader = CompileShaders("./Shaders/Dummy.vs", "./Shaders/Dummy.fs");
 
 	//Load Textures
 	m_RgbTexture = CreatePngTexture ("./Textures/rgb.png", GL_NEAREST );	// slot 0
@@ -45,6 +46,9 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	//Create VBOs
 	CreateVertexBufferObjects();
+
+	//Create Dummy Vertex
+	GenDummyMesh ( 32 , 32 );
 
 	//Gen Drop Info
 	int index = 0;
@@ -303,6 +307,63 @@ GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 	std::cout << filenameVS << ", " << filenameFS << " Shader compiling is done.";
 
 	return ShaderProgram;
+}
+
+
+void Renderer::GenDummyMesh ( int resolX , int resolY )
+{
+	float basePosX = -0.5f;
+	float basePosY = -0.5f;
+	float targetPosX = 0.5f;
+	float targetPosY = 0.5f;
+
+	int pointCountX = resolX + 1;
+	int pointCountY = resolY + 1;
+	float width = targetPosX - basePosX;
+	float height = targetPosY - basePosY;
+
+	float* point = new float[ pointCountX * pointCountY * 2 ];
+	float* vertices = new float[ ( pointCountX - 1 ) * ( pointCountY - 1 ) * 2 * 3 * 3 ];
+	m_VBODummyCount = ( pointCountX - 1 ) * ( pointCountY - 1 ) * 2 * 3; //Prepare points
+	for ( int x = 0; x < pointCountX; x++ ) {
+		for ( int y = 0; y < pointCountY; y++ ) {
+			point[ ( y * pointCountX + x ) * 2 + 0 ] = basePosX + width * ( x / ( float ) ( pointCountX - 1 ) );
+			point[ ( y * pointCountX + x ) * 2 + 1 ] = basePosY + height * ( y / ( float ) ( pointCountY - 1 ) );
+		}
+	}
+	//Make triangles
+	int vertIndex = 0;
+	for ( int x = 0; x < pointCountX - 1; x++ ) {
+		for ( int y = 0; y < pointCountY - 1; y++ ) {
+			//Triangle part 1
+			vertices[ vertIndex++ ] = point[ ( y * pointCountX + x ) * 2 + 0 ];
+			vertices[ vertIndex++ ] = point[ ( y * pointCountX + x ) * 2 + 1 ];
+			vertices[ vertIndex++ ] = 0.f;
+			vertices[ vertIndex++ ] = point[ ( ( y + 1 ) * pointCountX + ( x + 1 ) ) * 2 + 0 ];
+			vertices[ vertIndex++ ] = point[ ( ( y + 1 ) * pointCountX + ( x + 1 ) ) * 2 + 1 ];
+			vertices[ vertIndex++ ] = 0.f;
+			vertices[ vertIndex++ ] = point[ ( ( y + 1 ) * pointCountX + x ) * 2 + 0 ];
+			vertices[ vertIndex++ ] = point[ ( ( y + 1 ) * pointCountX + x ) * 2 + 1 ];
+			vertices[ vertIndex++ ] = 0.f;
+
+			//Triangle part 2
+			vertices[ vertIndex++ ] = point[ ( y * pointCountX + x ) * 2 + 0 ];
+			vertices[ vertIndex++ ] = point[ ( y * pointCountX + x ) * 2 + 1 ];
+			vertices[ vertIndex++ ] = 0.f;
+			vertices[ vertIndex++ ] = point[ ( y * pointCountX + ( x + 1 ) ) * 2 + 0 ];
+			vertices[ vertIndex++ ] = point[ ( y * pointCountX + ( x + 1 ) ) * 2 + 1 ];
+			vertices[ vertIndex++ ] = 0.f;
+			vertices[ vertIndex++ ] = point[ ( ( y + 1 ) * pointCountX + ( x + 1 ) ) * 2 + 0 ];
+			vertices[ vertIndex++ ] = point[ ( ( y + 1 ) * pointCountX + ( x + 1 ) ) * 2 + 1 ];
+			vertices[ vertIndex++ ] = 0.f;
+		}
+	}
+
+	glGenBuffers ( 1 , &m_VBODummy );
+
+	glBindBuffer ( GL_ARRAY_BUFFER , m_VBODummy );
+
+	glBufferData ( GL_ARRAY_BUFFER , sizeof ( float ) * ( pointCountX - 1 ) * ( pointCountY - 1 ) * 2 * 3 * 3 , vertices , GL_STATIC_DRAW );
 }
 
 void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a)
@@ -574,6 +635,37 @@ void Renderer::DrawFS()
 	glDisableVertexAttribArray(attribTPos);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::DrawDummy ( )
+{
+	QueryPerformanceCounter ( &t_end );
+
+	double elapsed = static_cast< double >( t_end.QuadPart - t_start.QuadPart ) / t_frequency.QuadPart;
+
+	QueryPerformanceCounter ( &t_start );
+
+	g_time += elapsed;
+
+	//Program select
+	int shader = m_DummyShader;
+	glUseProgram ( shader );
+
+	int attribPosition = glGetAttribLocation ( shader , "a_Pos" );
+	int attribTime = glGetUniformLocation ( shader , "u_Time" );
+	glUniform1f ( attribTime , g_time );
+
+	glEnableVertexAttribArray ( attribPosition );
+	
+
+	glBindBuffer ( GL_ARRAY_BUFFER , m_VBODummy );
+	glVertexAttribPointer ( attribPosition , 3 , GL_FLOAT , GL_FALSE , sizeof ( float ) * 3 , 0 );
+
+	glDrawArrays ( GL_TRIANGLES , 0 , m_VBODummyCount );
+
+	glDisableVertexAttribArray ( attribPosition );
+
+	glBindFramebuffer ( GL_FRAMEBUFFER , 0 );
 }
 
 void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)

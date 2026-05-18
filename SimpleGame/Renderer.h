@@ -23,6 +23,7 @@ public:
 	void DrawTriangle();
 	void DrawParticles();
 	void DrawFS();
+	void DrawDummy( );
 	GLuint CreatePngTexture ( char* filePath , GLuint samplingMethod );
 
 private:
@@ -37,6 +38,7 @@ private:
 	GLuint CompileShaders(char* filenameVS, char* filenameFS);
 	void CreateVertexBufferObjects();
 	void GetGLPosition(float x, float y, float *newX, float *newY);
+	void GenDummyMesh ( int resolX , int resolY );
 
 	bool m_Initialized = false;
 	
@@ -66,5 +68,10 @@ private:
 	GLuint m_NumsTexture = 0;
 	GLuint m_ParticleTexture = 0;
 	GLuint m_ParticleSpriteTexture = 0;
+
+	//Dummy Vertex
+	GLuint m_VBODummy = 0;
+	GLuint m_VBODummyCount = 0;
+	GLuint m_DummyShader = 0;
 };
 
