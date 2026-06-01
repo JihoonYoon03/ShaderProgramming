@@ -419,5 +419,5 @@ void FS_01_Q10()
 
 void main()
 {
-    FS_01_Q10();
+    RainDrop();
 }
