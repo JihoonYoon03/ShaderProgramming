@@ -33,12 +33,13 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_FSShader = CompileShaders("./Shaders/FS.vs", "./Shaders/FS.fs");
 	m_DummyShader = CompileShaders("./Shaders/Dummy.vs", "./Shaders/Dummy.fs");
 	m_TextureShader = CompileShaders("./Shaders/Texture.vs", "./Shaders/Texture.fs");
-
+	
 	//Load Textures
 	m_RgbTexture = CreatePngTexture ("./Textures/rgb.png", GL_NEAREST );	// slot 0
 	m_NumsTexture = CreatePngTexture ("./Textures/numbers.png", GL_NEAREST );	// slot 1
 	m_ParticleTexture = CreatePngTexture ("./Textures/particle.png", GL_NEAREST );	// slot 1
 	m_ParticleSpriteTexture = CreatePngTexture ("./Textures/explosion.png", GL_NEAREST );	// slot 1
+	m_AsdfTexture = CreatePngTexture ("./Textures/asdf.png", GL_NEAREST );	// slot 1
 
 	for ( int i = 0; i < 10; ++i ) {
 		std::string path = "./Textures/" + std::to_string ( i ) + ".png";
@@ -49,7 +50,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	CreateVertexBufferObjects();
 
 	//Create Dummy Vertex
-	GenDummyMesh ( 32 , 32 );
+	GenDummyMesh ( 200 , 200 );
 
 	//Gen Drop Info
 	int index = 0;
@@ -793,6 +794,14 @@ void Renderer::DrawDummy ( )
 	int attribPosition = glGetAttribLocation ( shader , "a_Pos" );
 	int attribTime = glGetUniformLocation ( shader , "u_Time" );
 	glUniform1f ( attribTime , g_time );
+
+	int uAsdfTex = glGetUniformLocation( shader , "u_AsdfTex" );
+	glUniform1i ( uAsdfTex , 0 );
+	glActiveTexture ( GL_TEXTURE0 );
+	glBindTexture ( GL_TEXTURE_2D , m_AsdfTexture );
+
+	int uPoints = glGetUniformLocation ( shader , "u_DropInfo" );
+	glUniform4fv ( uPoints , 1000 , m_DropPoints );
 
 	glEnableVertexAttribArray ( attribPosition );
 	
