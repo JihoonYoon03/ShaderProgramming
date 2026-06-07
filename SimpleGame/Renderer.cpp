@@ -456,8 +456,9 @@ void Renderer::GenFBOs ( )
 	glTexImage2D ( GL_TEXTURE_2D , 0 , GL_RGBA8 , 340 , 340 , 0 , GL_RGBA , GL_UNSIGNED_BYTE , 0 );
 
 	//Gen Render Buffer
-	glGenRenderbuffers ( 1 , &depthBuffer );
-	glBindRenderbuffer ( GL_RENDERBUFFER , depthBuffer );
+	GLuint depthBuffer1;
+	glGenRenderbuffers ( 1 , &depthBuffer1 );
+	glBindRenderbuffer ( GL_RENDERBUFFER , depthBuffer1 );
 	glRenderbufferStorage ( GL_RENDERBUFFER , GL_DEPTH_COMPONENT , 340 , 340 );
 	glBindRenderbuffer ( GL_RENDERBUFFER , 0 );
 
@@ -468,7 +469,7 @@ void Renderer::GenFBOs ( )
 	//Attach Color Buffer
 	glFramebufferTexture2D ( GL_FRAMEBUFFER , GL_COLOR_ATTACHMENT0 , GL_TEXTURE_2D , m_FBO_Texture1 , 0 );
 	//Attach Depth Buffer
-	glFramebufferRenderbuffer ( GL_FRAMEBUFFER , GL_DEPTH_ATTACHMENT , GL_RENDERBUFFER , depthBuffer );
+	glFramebufferRenderbuffer ( GL_FRAMEBUFFER , GL_DEPTH_ATTACHMENT , GL_RENDERBUFFER , depthBuffer1 );
 
 	//Check status
 	status = glCheckFramebufferStatus ( GL_FRAMEBUFFER );
@@ -487,8 +488,9 @@ void Renderer::GenFBOs ( )
 	glTexImage2D ( GL_TEXTURE_2D , 0 , GL_RGBA8 , 340 , 340 , 0 , GL_RGBA , GL_UNSIGNED_BYTE , 0 );
 
 	//Gen Render Buffer
-	glGenRenderbuffers ( 1 , &depthBuffer );
-	glBindRenderbuffer ( GL_RENDERBUFFER , depthBuffer );
+	GLuint depthBuffer2;
+	glGenRenderbuffers ( 1 , &depthBuffer2 );
+	glBindRenderbuffer ( GL_RENDERBUFFER , depthBuffer2 );
 	glRenderbufferStorage ( GL_RENDERBUFFER , GL_DEPTH_COMPONENT , 340 , 340 );
 	glBindRenderbuffer ( GL_RENDERBUFFER , 0 );
 
@@ -499,9 +501,61 @@ void Renderer::GenFBOs ( )
 	//Attach Color Buffer
 	glFramebufferTexture2D ( GL_FRAMEBUFFER , GL_COLOR_ATTACHMENT0 , GL_TEXTURE_2D , m_FBO_Texture2 , 0 );
 	//Attach Depth Buffer
-	glFramebufferRenderbuffer ( GL_FRAMEBUFFER , GL_DEPTH_ATTACHMENT , GL_RENDERBUFFER , depthBuffer );
+	glFramebufferRenderbuffer ( GL_FRAMEBUFFER , GL_DEPTH_ATTACHMENT , GL_RENDERBUFFER , depthBuffer2 );
 
 	//Check status
+	status = glCheckFramebufferStatus ( GL_FRAMEBUFFER );
+	if ( status != GL_FRAMEBUFFER_COMPLETE ) {
+		assert ( 0 );
+	}
+
+
+	//Gen Texture
+	glGenTextures ( 1 , &m_MRT_FBO_Texture0 );
+	glBindTexture ( GL_TEXTURE_2D , m_MRT_FBO_Texture0 );
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , GL_LINEAR );
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , GL_LINEAR );
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_S , GL_CLAMP_TO_EDGE );
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_T , GL_CLAMP_TO_EDGE );
+	glTexParameteri ( GL_TEXTURE_2D , GL_GENERATE_MIPMAP , GL_TRUE );
+	glTexImage2D ( GL_TEXTURE_2D , 0 , GL_RGBA8 , 340 , 340 , 0 , GL_RGBA , GL_UNSIGNED_BYTE , 0 );
+
+	glGenTextures ( 1 , &m_MRT_FBO_Texture1 );
+	glBindTexture ( GL_TEXTURE_2D , m_MRT_FBO_Texture1 );
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , GL_LINEAR );
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , GL_LINEAR );
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_S , GL_CLAMP_TO_EDGE );
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_T , GL_CLAMP_TO_EDGE );
+	glTexParameteri ( GL_TEXTURE_2D , GL_GENERATE_MIPMAP , GL_TRUE );
+	glTexImage2D ( GL_TEXTURE_2D , 0 , GL_RGBA8 , 340 , 340 , 0 , GL_RGBA , GL_UNSIGNED_BYTE , 0 );
+
+	glGenTextures ( 1 , &m_MRT_FBO_Texture2 );
+	glBindTexture ( GL_TEXTURE_2D , m_MRT_FBO_Texture2 );
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , GL_LINEAR );
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , GL_LINEAR );
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_S , GL_CLAMP_TO_EDGE );
+	glTexParameterf ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_T , GL_CLAMP_TO_EDGE );
+	glTexParameteri ( GL_TEXTURE_2D , GL_GENERATE_MIPMAP , GL_TRUE );
+	glTexImage2D ( GL_TEXTURE_2D , 0 , GL_RGBA8 , 340 , 340 , 0 , GL_RGBA , GL_UNSIGNED_BYTE , 0 );
+
+	//Gen Render Buffer
+	GLuint MRTdepthBuffer;
+	glGenRenderbuffers ( 1 , &MRTdepthBuffer );
+	glBindRenderbuffer ( GL_RENDERBUFFER , MRTdepthBuffer );
+	glRenderbufferStorage ( GL_RENDERBUFFER , GL_DEPTH_COMPONENT , 340 , 340 );
+	glBindRenderbuffer ( GL_RENDERBUFFER , 0 );
+
+	//GenFBO
+	glGenFramebuffers ( 1 , &m_MRT_FBO );
+	//Binding before Attach
+	glBindFramebuffer ( GL_FRAMEBUFFER , m_MRT_FBO );
+	//Attach Color Buffer
+	glFramebufferTexture2D ( GL_FRAMEBUFFER , GL_COLOR_ATTACHMENT0 , GL_TEXTURE_2D , m_MRT_FBO_Texture0 , 0 );
+	glFramebufferTexture2D ( GL_FRAMEBUFFER , GL_COLOR_ATTACHMENT1 , GL_TEXTURE_2D , m_MRT_FBO_Texture1 , 0 );
+	glFramebufferTexture2D ( GL_FRAMEBUFFER , GL_COLOR_ATTACHMENT2 , GL_TEXTURE_2D , m_MRT_FBO_Texture2 , 0 );
+	//Attach Depth Buffer
+	glFramebufferRenderbuffer ( GL_FRAMEBUFFER , GL_DEPTH_ATTACHMENT , GL_RENDERBUFFER , MRTdepthBuffer );
+
 	status = glCheckFramebufferStatus ( GL_FRAMEBUFFER );
 	if ( status != GL_FRAMEBUFFER_COMPLETE ) {
 		assert ( 0 );
@@ -829,22 +883,57 @@ void Renderer::DrawDummy_FBO ( )
 void Renderer::DrawAll_FBO ( )
 {
 	glBindFramebuffer ( GL_FRAMEBUFFER , m_FBO );
+	//Bind가 되어있는 프레임 버퍼 클리어
+	glClearColor ( 0.0f , 0.0f , 0.0f , 0.0f );
+	glClearDepth ( 1.0f );
+	glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glViewport ( 0 , 0 , 320 , 320 );
 	DrawFS ( );
 
 	glBindFramebuffer ( GL_FRAMEBUFFER , m_FBO1 );
+	glClearColor ( 0.0f , 0.0f , 0.0f , 0.0f );
+	glClearDepth ( 1.0f );
+	glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glViewport ( 0 , 0 , 320 , 320 );
 	DrawParticles ( );
 
 	glBindFramebuffer ( GL_FRAMEBUFFER , m_FBO2 );
+	glClearColor ( 0.0f , 0.0f , 0.0f , 0.0f );
+	glClearDepth ( 1.0f );
+	glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	glViewport ( 0 , 0 , 320 , 320 );
 	DrawDummy ( );
 
+	// 이 프레임 버퍼는 RenderScene에서 클리어 됨.
 	glBindFramebuffer ( GL_FRAMEBUFFER , 0 );
 	glViewport ( 0 , 0 , 640 , 640 );
+
 	DrawTexture ( m_FBO_Texture , -0.5 , 0 , 0.3 , false );
 	DrawTexture ( m_FBO_Texture1 , 0 , 0 , 0.3 , false );
 	DrawTexture ( m_FBO_Texture2 , 0.5 , 0, 0.3 , false );
+}
+
+void Renderer::DrawMultipleRenderTarget ( )
+{
+	glBindFramebuffer ( GL_FRAMEBUFFER , m_MRT_FBO );
+	GLenum DrawBuffers[ 3 ] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+	glDrawBuffers ( 3 , DrawBuffers );
+	glClearColor ( 0.0f , 0.0f , 0.0f , 0.0f );
+	glClearDepth ( 1.0f );
+	glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	glViewport ( 0 , 0 , 320 , 320 );
+
+	DrawFS( );
+
+	glBindFramebuffer ( GL_FRAMEBUFFER , 0 );
+	glViewport ( 0 , 0 , 640 , 640 );
+
+	GLenum ResetDrawBuffers[ 1 ] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers ( 1 , ResetDrawBuffers );
+
+	DrawTexture ( m_MRT_FBO_Texture0 , -0.5 , 0 , 0.3 , false );
+	DrawTexture ( m_MRT_FBO_Texture1 , 0.0 , 0 , 0.3 , false );
+	DrawTexture ( m_MRT_FBO_Texture2 , 0.5 , 0 , 0.3 , false );
 }
 
 void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)

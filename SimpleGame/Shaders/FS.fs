@@ -1,6 +1,8 @@
-#version 330
+ï»¿#version 330
 
 layout(location=0) out vec4 FragColor;
+layout(location=1) out vec4 FragColor1;
+layout(location=2) out vec4 FragColor2;
 
 uniform sampler2D u_RGBTex;
 uniform sampler2D u_CurrNumTex;
@@ -31,7 +33,7 @@ void Test()
 	}
 }
 
-void Pattern()
+vec4 Pattern()
 {
 	float lineCountH = 20;
 	float lineCountV = 20;
@@ -44,11 +46,11 @@ void Pattern()
 	float greyX = pow(abs(sin(v_TPos.x * c_PI * 2 * lineCountV - per)), lineWidth);
 	float greyY = pow(abs(sin(v_TPos.y * c_PI * 2 * lineCountH - per)), lineWidth);
 	
-	// À§¿Í µ¿ÀÏ
+	// ìœ„ì™€ ë™ì¼
 	// float greyX = pow(abs(cos(v_TPos.x * c_PI * 2 * lineCountH)), lineWidth);
 	// float greyY = pow(abs(cos(v_TPos.y * c_PI * 2 * lineCountV)), lineWidth);
 
-	FragColor = vec4(greyX + greyY);
+	return vec4(greyX + greyY);
 }
 
 void Circle()
@@ -84,29 +86,29 @@ void CircleSin()
 
 void AIFractalJulia()
 {
-    // 1. ÁÂÇ¥°è ¼³Á¤: v_TPos(0~1)¸¦ NDC ¹üÀ§(-1.5~1.5) Á¤µµ·Î È®Àå ¹× Áß½É ÀÌµ¿
+    // 1. ì¢Œí‘œê³„ ì„¤ì •: v_TPos(0~1)ë¥¼ NDC ë²”ìœ„(-1.5~1.5) ì •ë„ë¡œ í™•ì¥ ë° ì¤‘ì‹¬ ì´ë™
     vec2 z = (v_TPos * 2.0 - 1.0) * 1.5;
 
-    // 2. Julia SetÀÇ ¸ğ¾çÀ» °áÁ¤ÇÏ´Â »ó¼ö C
-    // ½Ã°£¿¡ µû¶ó º¯È­¸¦ ÁÖ¾î ¹®¾çÀÌ °è¼Ó ¿òÁ÷ÀÌ°Ô ¸¸µì´Ï´Ù.
+    // 2. Julia Setì˜ ëª¨ì–‘ì„ ê²°ì •í•˜ëŠ” ìƒìˆ˜ C
+    // ì‹œê°„ì— ë”°ë¼ ë³€í™”ë¥¼ ì£¼ì–´ ë¬¸ì–‘ì´ ê³„ì† ì›€ì§ì´ê²Œ ë§Œë“­ë‹ˆë‹¤.
     vec2 c = vec2(sin(u_Time * 0.5) * 0.4 - 0.1, cos(u_Time * 0.3) * 0.4 + 0.1);
     float iter = 0.0;
-    const float maxIter = 64.0; // ¹İº¹ È½¼ö°¡ ³ôÀ»¼ö·Ï Á¤±³ÇØÁı´Ï´Ù.
+    const float maxIter = 64.0; // ë°˜ë³µ íšŸìˆ˜ê°€ ë†’ì„ìˆ˜ë¡ ì •êµí•´ì§‘ë‹ˆë‹¤.
 
-    // 3. ÇÁ·¢Å» ¹İº¹ °è»ê: z = z^2 + c
+    // 3. í”„ë™íƒˆ ë°˜ë³µ ê³„ì‚°: z = z^2 + c
     for(float i = 0.0; i < maxIter; i++) {
         float x = (z.x * z.x - z.y * z.y) + c.x;
         float y = (2.0 * z.x * z.y) + c.y;
         
         z = vec2(x, y);
-        // ¹ß»ê Ã¼Å© (°Å¸®°¡ 2¸¦ ³ÑÀ¸¸é ÇÁ·¢Å» ÁıÇÕ¿¡¼­ ¹ş¾î³²)
+        // ë°œì‚° ì²´í¬ (ê±°ë¦¬ê°€ 2ë¥¼ ë„˜ìœ¼ë©´ í”„ë™íƒˆ ì§‘í•©ì—ì„œ ë²—ì–´ë‚¨)
         if(length(z) > 2.0) break;
         iter++;
     }
     
-    // 4. Å»Ãâ ¼Óµµ(iter)¿¡ µû¸¥ »ö»ó °áÁ¤
+    // 4. íƒˆì¶œ ì†ë„(iter)ì— ë”°ë¥¸ ìƒ‰ìƒ ê²°ì •
     if(iter == maxIter) {
-        FragColor = vec4(0.0, 0.0, 0.0, 1.0); // ÁıÇÕ ³»ºÎ: ¾îµÎ¿î »ö
+        FragColor = vec4(0.0, 0.0, 0.0, 1.0); // ì§‘í•© ë‚´ë¶€: ì–´ë‘ìš´ ìƒ‰
     } else {
         float f = iter / maxIter;
         vec3 color = vec3(
@@ -120,21 +122,21 @@ void AIFractalJulia()
 
 void AIContinuousInfiniteZoom()
 {
-    // 1. ÁÂÇ¥ Á¤±ÔÈ­ (-1.0 ~ 1.0)
+    // 1. ì¢Œí‘œ ì •ê·œí™” (-1.0 ~ 1.0)
     vec2 uv = v_TPos * 2.0 - 1.0;
     vec3 finalColor = vec3(0.0);
-    float time = u_Time * 0.5; // ÀüÃ¼ÀûÀÎ ¼Óµµ Á¶Àı
+    float time = u_Time * 0.5; // ì „ì²´ì ì¸ ì†ë„ ì¡°ì ˆ
     
-    // 2. ´ÙÁß ·¹ÀÌ¾î ºí·»µù (3°³ ·¹ÀÌ¾î)
+    // 2. ë‹¤ì¤‘ ë ˆì´ì–´ ë¸”ë Œë”© (3ê°œ ë ˆì´ì–´)
     for(int i = 0; i < 3; i++) {
         float layerOffset = float(i);
         float f = fract(time + layerOffset / 3.0); 
         
-        // Áö¼öÀû ÁÜ
+        // ì§€ìˆ˜ì  ì¤Œ
         float zoom = pow(8.0, 1.0 - f);
         vec2 uvLayer = uv * zoom;
         
-        // 3. ±âÇÏÇĞÀû ÇüÅÂ »ı¼º
+        // 3. ê¸°í•˜í•™ì  í˜•íƒœ ìƒì„±
         float angle = time * 0.2 + layerOffset;
         float s = sin(angle), c = cos(angle);
         mat2 rot = mat2(c, -s, s, c);
@@ -144,12 +146,12 @@ void AIContinuousInfiniteZoom()
             uvLayer *= 1.2;
         }
         
-        // 4. ¼±¸íµµ ¹× Åõ¸íµµ °è»ê
+        // 4. ì„ ëª…ë„ ë° íˆ¬ëª…ë„ ê³„ì‚°
         float opacity = sin(f * c_PI);
         float dist = length(uvLayer);
         float line = 0.01 / abs(sin(dist * 3.0 + time));
         
-        // 5. »ö»ó Á¶ÇÕ
+        // 5. ìƒ‰ìƒ ì¡°í•©
         vec3 col = 0.5 + 0.5 * cos(time + vec3(0, 2, 4) + layerOffset);
         finalColor += col * line * opacity;
     }
@@ -157,7 +159,7 @@ void AIContinuousInfiniteZoom()
     FragColor = vec4(finalColor, 1.0);
 }
 
-void RainDrop()
+vec4 RainDrop()
 {
     float accum = 0;
 
@@ -181,18 +183,18 @@ void RainDrop()
             accum += value * fade * oneMinus;
         }
     }
-    FragColor = vec4(accum);
+    return vec4(accum);
 }
 
-void Flag()
+vec4 Flag()
 {
     float amp = 0.3;
     float speed = 15;
     float sinInput = c_PI * 2 * v_TPos.x - u_Time * speed;
-    // v_TPos.x·Î 0~1 ±¸°£º°·Î °ª º¸Á¤
+    // v_TPos.xë¡œ 0~1 êµ¬ê°„ë³„ë¡œ ê°’ ë³´ì •
     float sinValue = v_TPos.x * amp * (((sin(sinInput) + 1) / 2) - 0.5) + 0.5;
 
-    float fWidth = 0.0; // width¿¡ ´ëÇÑ ºñÀ²
+    float fWidth = 0.0; // widthì— ëŒ€í•œ ë¹„ìœ¨
     float width = 0.7 * (mix(1, fWidth, v_TPos.x));
     float grey = 0;
 
@@ -201,10 +203,9 @@ void Flag()
     }
     else {
         grey = 0;
-        discard;
     }
 
-    FragColor = vec4(grey);
+    return vec4(grey);
 }
 
 void Smoke()
@@ -213,10 +214,10 @@ void Smoke()
     float speed = 5;
     float newY = 1 - v_TPos.y;
     float sinInput = c_PI * 2 * newY - u_Time * speed;
-    // v_TPos.y·Î 0~1 ±¸°£º°·Î °ª º¸Á¤
+    // v_TPos.yë¡œ 0~1 êµ¬ê°„ë³„ë¡œ ê°’ ë³´ì •
     float sinValue = newY * amp * (((sin(sinInput) + 1) / 2) - 0.5) + 0.5;
 
-    float fWidth = 0.0; // width¿¡ ´ëÇÑ ºñÀ²
+    float fWidth = 0.0; // widthì— ëŒ€í•œ ë¹„ìœ¨
     float width = 0.5 * (mix(fWidth, 1, newY));
     float grey = 0;
 
@@ -329,7 +330,7 @@ void Nums()
 
 void NumsAI()
 {
-    // 1. ÀÚ¸´¼ö °è»ê (0ÀÎ °æ¿ì´Â 1ÀÚ¸®·Î Ã³¸®)
+    // 1. ìë¦¿ìˆ˜ ê³„ì‚° (0ì¸ ê²½ìš°ëŠ” 1ìë¦¬ë¡œ ì²˜ë¦¬)
     int num = u_InputNum;
     int absNum = num < 0 ? -num : num;
 
@@ -340,22 +341,22 @@ void NumsAI()
         digitCount++;
     }
 
-    // 2. v_TPos.x¸¦ ÀÚ¸´¼ö¸¸Å­ ºĞÇÒÇÏ¿©, ÇöÀç ÇÈ¼¿ÀÌ ¾î´À ÀÚ¸®(¿ŞÂÊºÎÅÍ 0¹øÂ°)¿¡ ÀÖ´ÂÁö °è»ê
+    // 2. v_TPos.xë¥¼ ìë¦¿ìˆ˜ë§Œí¼ ë¶„í• í•˜ì—¬, í˜„ì¬ í”½ì…€ì´ ì–´ëŠ ìë¦¬(ì™¼ìª½ë¶€í„° 0ë²ˆì§¸)ì— ìˆëŠ”ì§€ ê³„ì‚°
     float scaledX = v_TPos.x * float(digitCount);   // 0 ~ digitCount
-    int digitIndex = int(floor(scaledX));           // ¿ŞÂÊ ÀÚ¸´¼öºÎÅÍ 0, 1, 2, ...
-    if (digitIndex >= digitCount) digitIndex = digitCount - 1; // °æ°è º¸Á¤
-    float localX = fract(scaledX);                  // ¼¿ ³»ºÎ 0~1
+    int digitIndex = int(floor(scaledX));           // ì™¼ìª½ ìë¦¿ìˆ˜ë¶€í„° 0, 1, 2, ...
+    if (digitIndex >= digitCount) digitIndex = digitCount - 1; // ê²½ê³„ ë³´ì •
+    float localX = fract(scaledX);                  // ì…€ ë‚´ë¶€ 0~1
 
-    // 3. ÇØ´ç ÀÚ¸®ÀÇ ¼ıÀÚ °ª ÃßÃâ
-    //    ex) 1234¿¡¼­ ¿ŞÂÊ(digitIndex=0)Àº 1000ÀÚ¸® ¡æ power = 10^(digitCount-1-digitIndex)
+    // 3. í•´ë‹¹ ìë¦¬ì˜ ìˆ«ì ê°’ ì¶”ì¶œ
+    //    ex) 1234ì—ì„œ ì™¼ìª½(digitIndex=0)ì€ 1000ìë¦¬ â†’ power = 10^(digitCount-1-digitIndex)
     int power = 1;
     for (int i = 0; i < digitCount - 1 - digitIndex; i++) {
         power *= 10;
     }
     int index = (absNum / power) - (absNum / (power * 10)) * 10;  // (absNum / power) % 10
 
-    // 4. ±âÁ¸ Nums ·ÎÁ÷: 0~9 ÅØ½ºÃ³¿¡¼­ ÇØ´ç ¼ıÀÚ ¼¿À» »ùÇÃ¸µ
-    //    °¡·Î 5Ä­, ¼¼·Î 2Ä­ ±×¸®µå. °¡·Î ¹æÇâ¸¸ localX·Î ±³Ã¼.
+    // 4. ê¸°ì¡´ Nums ë¡œì§: 0~9 í…ìŠ¤ì²˜ì—ì„œ í•´ë‹¹ ìˆ«ì ì…€ì„ ìƒ˜í”Œë§
+    //    ê°€ë¡œ 5ì¹¸, ì„¸ë¡œ 2ì¹¸ ê·¸ë¦¬ë“œ. ê°€ë¡œ ë°©í–¥ë§Œ localXë¡œ êµì²´.
     float tx = localX / 5.0;
     float ty = v_TPos.y / 2.0;
 
@@ -419,5 +420,7 @@ void FS_01_Q10()
 
 void main()
 {
-    RainDrop();
+    FragColor = RainDrop();
+    FragColor1 = Flag();
+    FragColor2 = Pattern();
 }

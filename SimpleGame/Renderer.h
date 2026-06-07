@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <string>
 #include <cstdlib>
@@ -26,7 +26,7 @@ public:
 	void DrawDummy( );
 	void DrawDummy_FBO ( );
 	void DrawAll_FBO ( );
-	GLuint CreatePngTexture ( char* filePath , GLuint samplingMethod );
+	void DrawMultipleRenderTarget ( );
 
 private:
 	std::default_random_engine dre{};
@@ -34,6 +34,7 @@ private:
 	std::uniform_real_distribution<float> urd0_1{ 0.f, 1.f };
 	std::uniform_real_distribution<float> urd2_5{ 2.f, 5.f };
 
+	GLuint CreatePngTexture ( char* filePath , GLuint samplingMethod );
 	void Initialize(int windowSizeX, int windowSizeY);
 	bool ReadFile(char* filename, std::string *target);
 	void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
@@ -90,5 +91,10 @@ private:
 	GLuint m_FBO_Texture1 = 0;
 	GLuint m_FBO2 = 0;
 	GLuint m_FBO_Texture2 = 0;
+
+	GLuint m_MRT_FBO = 0;
+	GLuint m_MRT_FBO_Texture0 = 0;
+	GLuint m_MRT_FBO_Texture1 = 0;
+	GLuint m_MRT_FBO_Texture2 = 0;
 };
 

@@ -20,7 +20,7 @@ Renderer *g_Renderer = NULL;
 void RenderScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Renderer Test
 	//g_Renderer->DrawSolidRect(0, 0, 0, 4, 1, 0, 1, 1);
@@ -29,7 +29,8 @@ void RenderScene(void)
 	//g_Renderer->DrawFS();
 	//g_Renderer->DrawDummy();
 	//g_Renderer->DrawDummy_FBO();
-	g_Renderer->DrawAll_FBO( );
+	//g_Renderer->DrawAll_FBO( );
+	g_Renderer->DrawMultipleRenderTarget ( );
 
 	glutSwapBuffers();
 }
