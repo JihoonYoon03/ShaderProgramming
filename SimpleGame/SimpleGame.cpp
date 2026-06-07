@@ -1,4 +1,4 @@
-/*
+﻿/*
 Copyright 2022 Lee Taek Hee (Tech University of Korea)
 
 This program is free software: you can redistribute it and/or modify
@@ -27,9 +27,9 @@ void RenderScene(void)
 	//g_Renderer->DrawTriangle();
 	//g_Renderer->DrawParticles();
 	//g_Renderer->DrawFS();
-	g_Renderer->DrawDummy();
+	//g_Renderer->DrawDummy();
 	//g_Renderer->DrawDummy_FBO();
-	//g_Renderer->DrawAll_FBO ( );
+	g_Renderer->DrawAll_FBO( );
 
 	glutSwapBuffers();
 }

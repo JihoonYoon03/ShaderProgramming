@@ -1,4 +1,4 @@
-#include "stdafx.h"
+Ôªø#include "stdafx.h"
 #include "Renderer.h"
 #include "LoadPng.h"
 #include <assert.h>
@@ -149,22 +149,22 @@ void Renderer::CreateVertexBufferObjects()
 		mass, vx, vy	// Triangle 2
 	};
 
-	// VBO æ∆¿Ãµ ¡ˆ¡§ π◊ πŸ¿Œµ˘
+	// VBO ÏïÑÏù¥Îîî ÏßÄÏ†ï Î∞è Î∞îÏù∏Îî©
 	glGenBuffers(1, &m_VBOTriangle);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTriangle);
 
-	// glBufferDataø°º≠ m_VBOTriangleø° Ω«¡¶ ∏ﬁ∏∏Æ ¡÷º“ ¿˙¿Â«—¥Ÿ∞Ì ∫∏∏È µ 
-	// µø±‚Ωƒ¿∏∑Œ ¿€µø. µ•¿Ã≈Õ ø√∂Û∞• ∂ß ±Ó¡ˆ ±‚¥Ÿ∏≤
+	// glBufferDataÏóêÏÑú m_VBOTriangleÏóê Ïã§Ï†ú Î©îÎ™®Î¶¨ Ï£ºÏÜå Ï†ÄÏû•ÌïúÎã§Í≥† Î≥¥Î©¥ Îê®
+	// ÎèôÍ∏∞ÏãùÏúºÎ°ú ÏûëÎèô. Îç∞Ïù¥ÌÑ∞ Ïò¨ÎùºÍ∞à Îïå ÍπåÏßÄ Í∏∞Îã§Î¶º
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
 
-	// VBO æ∆¿Ãµ ¡ˆ¡§ π◊ πŸ¿Œµ˘
+	// VBO ÏïÑÏù¥Îîî ÏßÄÏ†ï Î∞è Î∞îÏù∏Îî©
 	glGenBuffers(1, &m_VBOParticles);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle) * numParticles, nullptr, GL_STATIC_DRAW);
 	
 	size = 0.1f;
 
-	// ¡§¡° 1∞≥ = x, y, z, mass, vx, vy, RV0, RV1, RV2, tx, ty, r, g, b -> √— 14∞≥ float
+	// Ï†ïÏ†ê 1Í∞ú = x, y, z, mass, vx, vy, RV0, RV1, RV2, tx, ty, r, g, b -> Ï¥ù 14Í∞ú float
 	for (int i = 0; i < numParticles; ++i) {
 		float vx_ = urd(dre);
 		float vy_ = urd(dre);
@@ -554,7 +554,7 @@ void Renderer::DrawTriangle()
 	glEnableVertexAttribArray(attribMass);
 	glEnableVertexAttribArray(attribVel);
 
-	// DX12 Root Signature√≥∑≥ Vertex shader ¿‘∑¬ø° ∏¬∞‘ ºˆ¡§
+	// DX12 Root SignatureÏ≤òÎüº Vertex shader ÏûÖÎ†•Ïóê ÎßûÍ≤å ÏàòÏ†ï
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOTriangle);
 	glVertexAttribPointer(attribPosition,
 		3, GL_FLOAT,
@@ -630,7 +630,7 @@ void Renderer::DrawParticles()
 
 	int stride = 14;
 
-	// DX12 Root Signature√≥∑≥ Vertex shader ¿‘∑¬ø° ∏¬∞‘ ºˆ¡§
+	// DX12 Root SignatureÏ≤òÎüº Vertex shader ÏûÖÎ†•Ïóê ÎßûÍ≤å ÏàòÏ†ï
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBOParticles);
 	glVertexAttribPointer(attribPosition,
 		3, GL_FLOAT,
@@ -688,7 +688,7 @@ void Renderer::DrawParticles()
 }
 
 
-//======================= «¡∑°±◊∏’∆Æ ºŒ¿Ã¥ı ≈◊Ω∫∆ÆøÎ «‘ºˆ
+//======================= ÌîÑÎûòÍ∑∏Î®ºÌä∏ ÏÖ∞Ïù¥Îçî ÌÖåÏä§Ìä∏Ïö© Ìï®Ïàò
 int g_CurrNum = 0;
 void Renderer::DrawFS()
 //=======================
@@ -834,7 +834,7 @@ void Renderer::DrawAll_FBO ( )
 
 	glBindFramebuffer ( GL_FRAMEBUFFER , m_FBO1 );
 	glViewport ( 0 , 0 , 320 , 320 );
-	DrawTriangle ( );
+	DrawParticles ( );
 
 	glBindFramebuffer ( GL_FRAMEBUFFER , m_FBO2 );
 	glViewport ( 0 , 0 , 320 , 320 );
@@ -842,9 +842,9 @@ void Renderer::DrawAll_FBO ( )
 
 	glBindFramebuffer ( GL_FRAMEBUFFER , 0 );
 	glViewport ( 0 , 0 , 640 , 640 );
-	DrawTexture ( m_FBO , -0.5 , 0 , 0.3 , false );
-	DrawTexture ( m_FBO1 , 0 , 0 , 0.3 , false );
-	DrawTexture ( m_FBO2 , 0.5 , 0, 0.3 , false );
+	DrawTexture ( m_FBO_Texture , -0.5 , 0 , 0.3 , false );
+	DrawTexture ( m_FBO_Texture1 , 0 , 0 , 0.3 , false );
+	DrawTexture ( m_FBO_Texture2 , 0.5 , 0, 0.3 , false );
 }
 
 void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
