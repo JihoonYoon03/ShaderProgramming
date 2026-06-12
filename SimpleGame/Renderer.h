@@ -46,6 +46,7 @@ private:
 	void DrawTexture ( GLuint texID , float x , float y , float scale , bool flip );
 	void GenFBOs ( );
 	void DrawGaussianBlur ( GLuint texID , GLuint targetFBOID , GLuint shader );
+	void DrawAccumResult ( GLuint texOri , GLuint texBlurred, bool bFlip );
 
 	bool m_Initialized = false;
 	
@@ -108,5 +109,8 @@ private:
 	GLuint m_PingpongTexture[ 2 ];
 	GLuint m_BlurH_Shader = 0;
 	GLuint m_BlurV_Shader = 0;
+
+	//Accum
+	GLuint m_AccumShader = 0;
 };
 

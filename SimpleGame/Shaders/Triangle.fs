@@ -50,7 +50,7 @@ void CircleShapeHDR()
 
 	float d = distance(vec2(0.5, 0.5), v_Tex);
 	if (d < 0.5) {
-		newColor = vec4(v_Color * 1.5, clamp(0.5 - d, 0, 0.5) * 2.0);
+		newColor = vec4(v_Color * 5, clamp(0.5 - d, 0, 0.5) * 2.0);
 	}
 	else {
 		newColor = vec4(0);
