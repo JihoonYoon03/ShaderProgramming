@@ -1,4 +1,4 @@
-#version 330
+ï»¿#version 330
 
 uniform float u_Time;
 
@@ -19,8 +19,8 @@ const float c_PI = 3.141592;
 const float c_G = -9.8;
 
 // AI
-// --- Pseudo Random Generator ÇÔ¼ö Ãß°¡ ---
-// vec2¸¦ ½Ãµå·Î ¹Ş¾Æ 0.0 ~ 1.0 »çÀÌÀÇ float ³­¼ö¸¦ »ı¼ºÇÕ´Ï´Ù.
+// --- Pseudo Random Generator í•¨ìˆ˜ ì¶”ê°€ ---
+// vec2ë¥¼ ì‹œë“œë¡œ ë°›ì•„ 0.0 ~ 1.0 ì‚¬ì´ì˜ float ë‚œìˆ˜ë¥¼ ìƒì„±í•©ë‹ˆë‹¤.
 float Hash(vec2 seed)
 {
     return fract(sin(dot(seed, vec2(12.9898, 78.233))) * 43758.5453123);
@@ -102,23 +102,23 @@ void AI_motion()
     float PI = 3.141592;
     float t = u_Time * 2.0 * PI;
 
-    // ºÎµå·¯¿î ÁÂ¿ì ÀÌµ¿ (ease in/out)
+    // ë¶€ë“œëŸ¬ìš´ ì¢Œìš° ì´ë™ (ease in/out)
     float moveX = sin(t) * 0.5;
 
-    // À§¾Æ·¡ bounce
+    // ìœ„ì•„ë˜ bounce
     float moveY = abs(sin(t * 2.0)) * 0.2;
 
-    // squash & stretch (»çÀÌÁî °úÀå)
+    // squash & stretch (ì‚¬ì´ì¦ˆ ê³¼ì¥)
     float scaleX = 1.0 + 0.4 * abs(sin(t));
     float scaleY = 1.0 - 0.3 * abs(sin(t));
 
     vec3 pos = a_Pos;
 
-    // ½ºÄÉÀÏ Àû¿ë
+    // ìŠ¤ì¼€ì¼ ì ìš©
     pos.x *= scaleX;
     pos.y *= scaleY;
 
-    // ÀÌµ¿ Àû¿ë
+    // ì´ë™ ì ìš©
     pos.x += moveX;
     pos.y += moveY;
 
@@ -148,6 +148,9 @@ void Falling()
     else {
         gl_Position = vec4(-1000, 0, 0, 0);
     }
+
+    v_Color = a_RGB;
+    v_Tex = a_Tex;
 }
 
 void Falling_circle()
@@ -159,8 +162,8 @@ void Falling_circle()
         
         float lifeScale = 2.0f;
         float lifeTime = 0.5f * a_RV2 * lifeScale;
-        // float t = lifeTime * fract(newTime / lifeTime); // fract() -> 0.0 ~ 1.0, lifeTime °öÇØ 0.0 ~ lifeTime ±¸°£ ¹İº¹
-        float t = mod(newTime, lifeTime);   // À§¿Í µ¿ÀÏ
+        // float t = lifeTime * fract(newTime / lifeTime); // fract() -> 0.0 ~ 1.0, lifeTime ê³±í•´ 0.0 ~ lifeTime êµ¬ê°„ ë°˜ë³µ
+        float t = mod(newTime, lifeTime);   // ìœ„ì™€ ë™ì¼
         float tt = t * t;
         float vx, vy;
         float sx, sy;
@@ -181,6 +184,9 @@ void Falling_circle()
     else {
         gl_Position = vec4(-1000, 0, 0, 0);
     }
+
+    v_Color = a_RGB;
+    v_Tex = a_Tex;
 }
 
 void Shape()
@@ -211,5 +217,5 @@ void Shape()
 
 void main()
 {
-    Shape();
+    Falling_circle();
 }

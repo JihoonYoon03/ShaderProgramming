@@ -22,6 +22,7 @@ public:
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawTriangle();
 	void DrawParticles();
+	void DrawTriangle_Bloom();
 	void DrawFS();
 	void DrawDummy( );
 	void DrawDummy_FBO ( );
@@ -92,9 +93,14 @@ private:
 	GLuint m_FBO2 = 0;
 	GLuint m_FBO_Texture2 = 0;
 
+	// Multiple Render Target
 	GLuint m_MRT_FBO = 0;
 	GLuint m_MRT_FBO_Texture0 = 0;
 	GLuint m_MRT_FBO_Texture1 = 0;
 	GLuint m_MRT_FBO_Texture2 = 0;
+
+	GLuint m_MRT_HDR_FBO = 0;
+	GLuint m_MRT_HDR_FBO_High_Texture = 0;	// float texture
+	GLuint m_MRT_HDR_FBO_Low_Texture = 0;	// float texture
 };
 

@@ -561,6 +561,32 @@ void Renderer::GenFBOs ( )
 		assert ( 0 );
 	}
 
+	glGenTextures ( 1 , &m_MRT_HDR_FBO_High_Texture );
+	glBindTexture ( GL_TEXTURE_2D, m_MRT_HDR_FBO_High_Texture );
+	glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , GL_LINEAR );
+	glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , GL_LINEAR );
+	glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_S , GL_CLAMP_TO_EDGE );
+	glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_T , GL_CLAMP_TO_EDGE );
+	glTexImage2D ( GL_TEXTURE_2D , 0 , GL_RGBA16F , 1024 , 1024 , 0 , GL_RGBA , GL_FLOAT , NULL );
+
+	glGenTextures ( 1 , &m_MRT_HDR_FBO_Low_Texture );
+	glBindTexture ( GL_TEXTURE_2D, m_MRT_HDR_FBO_Low_Texture );
+	glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_MIN_FILTER , GL_LINEAR );
+	glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_MAG_FILTER , GL_LINEAR );
+	glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_S , GL_CLAMP_TO_EDGE );
+	glTexParameteri ( GL_TEXTURE_2D , GL_TEXTURE_WRAP_T , GL_CLAMP_TO_EDGE );
+	glTexImage2D ( GL_TEXTURE_2D , 0 , GL_RGBA16F , 1024 , 1024 , 0 , GL_RGBA , GL_FLOAT , NULL );
+
+	glGenFramebuffers ( 1 , &m_MRT_HDR_FBO );
+	glBindFramebuffer ( GL_FRAMEBUFFER , m_MRT_HDR_FBO );
+	glFramebufferTexture2D ( GL_FRAMEBUFFER , GL_COLOR_ATTACHMENT0 , GL_TEXTURE_2D , m_MRT_HDR_FBO_Low_Texture , 0 );
+	glFramebufferTexture2D ( GL_FRAMEBUFFER , GL_COLOR_ATTACHMENT1 , GL_TEXTURE_2D , m_MRT_HDR_FBO_High_Texture , 0 );
+
+	status = glCheckFramebufferStatus ( GL_FRAMEBUFFER );
+	if ( status != GL_FRAMEBUFFER_COMPLETE ) {
+		assert ( 0 );
+	}
+
 	glBindFramebuffer ( GL_FRAMEBUFFER , 0 );
 }
 
@@ -740,7 +766,6 @@ void Renderer::DrawParticles()
 
 	glDisable ( GL_BLEND );
 }
-
 
 //======================= 프래그먼트 셰이더 테스트용 함수
 int g_CurrNum = 0;
@@ -935,6 +960,30 @@ void Renderer::DrawMultipleRenderTarget ( )
 	DrawTexture ( m_MRT_FBO_Texture1 , 0.0 , 0 , 0.3 , false );
 	DrawTexture ( m_MRT_FBO_Texture2 , 0.5 , 0 , 0.3 , false );
 }
+
+
+void Renderer::DrawTriangle_Bloom ( )
+{
+	glBindFramebuffer ( GL_FRAMEBUFFER , m_MRT_HDR_FBO );
+	GLenum DrawBuffers[ 2 ] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers ( 2 , DrawBuffers );
+	glClearColor ( 0.0f , 0.0f , 0.0f , 0.0f );
+	glClearDepth ( 1.0f );
+	glClear ( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+	glViewport ( 0 , 0 , 1024 , 1024 );
+
+	DrawParticles ( );
+
+	glBindFramebuffer ( GL_FRAMEBUFFER , 0 );
+	glViewport ( 0 , 0 , 640 , 640 );
+
+	GLenum ResetDrawBuffers[ 1 ] = { GL_COLOR_ATTACHMENT0 };
+	glDrawBuffers ( 1 , ResetDrawBuffers );
+
+	DrawTexture ( m_MRT_HDR_FBO_Low_Texture , -0.5 , 0 , 0.5 , false );
+	DrawTexture ( m_MRT_HDR_FBO_High_Texture , 0.5 , 0 , 0.5 , false );
+}
+
 
 void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
 {
