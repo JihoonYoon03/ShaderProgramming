@@ -249,10 +249,55 @@ void Ex3()
     gl_Position = pos;
 }
 
+void VS_01_Q1()
+{
+    vec4 newPosition = vec4(0, 0, 0, 1);
+    newPosition.x = a_Pos.x + a_RV0 * 2 - 1;
+    newPosition.y = a_Pos.y + sin(c_PI * 4 * a_RV0) / 2;
+    gl_Position = newPosition;
+}
+
+void VS_01_Q2()
+{
+    vec4 newPosition = vec4(0, 0, 0, 1);
+    newPosition.x = a_Pos.x + a_RV0 * 2 - 1;
+    newPosition.y = a_Pos.y + a_RV1 * 2 - 1;
+    gl_Position = newPosition;
+}
+
+void VS_01_Q3()
+{
+    vec4 newPosition = vec4(0, 0, 0, 1);
+    newPosition.x = a_Pos.x + a_RV0 * 2 - 1;
+    newPosition.y = a_Pos.y + -(a_RV0 * 2 - 1);
+    gl_Position = newPosition;
+}
+
+void VS_01_Q4()
+{
+    vec4 newPosition = vec4(0, 0, 0, 1);
+    newPosition.x = a_Pos.x + cos(c_PI * 2 * a_RV0) / 2;
+    newPosition.y = a_Pos.y + sin(c_PI * 2 * a_RV0);
+    gl_Position = newPosition;
+}
+
+void VS_01_Q5()
+{
+    vec4 newPosition = vec4(0, 0, 0, 1);
+    newPosition.x = a_Pos.x + a_RV0 * 2 - 1;
+    newPosition.y = a_Pos.y + fract(a_RV0 * 2) * 2 - 1;
+    gl_Position = newPosition;
+}
+
 void main()
 {
     //Falling_circle();
     //Ex1();
     //Ex2();
-    Ex3();
+    //Ex3();
+    //VS_Q1();
+    //VS_01_Q2();
+    //VS_01_Q3();
+    //VS_01_Q4();
+    //VS_01_Q5();
 }

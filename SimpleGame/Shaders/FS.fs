@@ -372,18 +372,16 @@ void FS_01_Q6()
     float tx = fract(v_TPos.x * 3);
     float ty = v_TPos.y / 3;
     float offsetX = 0;
-    float offsetY = (3 - floor(v_TPos.x * 3)) / 3;
-
+    float offsetY = abs(floor(v_TPos.x * 3.0) / 3 - 2);
     FragColor = texture(u_RGBTex, vec2(tx + offsetX, ty + offsetY));
 }
 
 void FS_01_Q7()
 {
     float tx = v_TPos.x;
-    float ty = fract(v_TPos.y * 3)/3;
+    float ty = fract(v_TPos.y + (1 / 3.0)); // fract(v_Tex.y * 3) / 3;
     float offsetX = 0;
-    float offsetY = fract((floor(v_TPos.y * 3) + 1) / 3);
-
+    float offsetY = 0; //fract(ceil(v_TPos.y * 3.0) / 3.0);
     FragColor = texture(u_RGBTex, vec2(tx + offsetX, ty + offsetY));
 }
 
@@ -391,19 +389,17 @@ void FS_01_Q8()
 {
     float tx = v_TPos.x / 5;
     float ty = v_TPos.y / 2;
-    float offsetX = 2 / 5.0;
-    float offsetY = 1 / 2.0;
-
+    float offsetX = 2.0 / 5;
+    float offsetY = 1.0 / 2;
     FragColor = texture(u_NumsTex, vec2(tx + offsetX, ty + offsetY));
 }
 
 void FS_01_Q9()
 {
-    float tx = v_TPos.x * 2 / 5;
+    float tx = v_TPos.x / 5 * 2;
     float ty = v_TPos.y / 2;
-    float offsetX = 2 / 5.0;
+    float offsetX = 2.0 / 5;
     float offsetY = 0;
-
     FragColor = texture(u_NumsTex, vec2(tx + offsetX, ty + offsetY));
 }
 
@@ -412,15 +408,15 @@ void FS_01_Q10()
     float index = float(8);
     float tx = v_TPos.x / 5;
     float ty = v_TPos.y / 2;
-    float offsetX = fract(index / 5.0);
-    float offsetY = floor(index / 5.0) / 2.0;
-
+    float offsetX = mod(index, 5) / 5;
+    float offsetY = floor(index / 5.0) / 2;
     FragColor = texture(u_NumsTex, vec2(tx + offsetX, ty + offsetY));
 }
 
 void main()
 {
-    FragColor = RainDrop();
-    FragColor1 = Flag();
-    FragColor2 = Pattern();
+    //FragColor = RainDrop();
+    //FragColor1 = Flag();
+    //FragColor2 = Pattern();
+    FS_01_Q10();
 }
