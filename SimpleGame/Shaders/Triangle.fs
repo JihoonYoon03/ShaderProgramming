@@ -68,7 +68,13 @@ void CircleShapeHDR()
 	}
 }
 
+void VCOLOR()
+{
+	FragColor = vec4(v_Color, 1);
+}
+
 void main()
 {
-	CircleShapeHDR();
+	//CircleShapeHDR();
+	VCOLOR();
 }

@@ -19,19 +19,20 @@ Renderer *g_Renderer = NULL;
 
 void RenderScene(void)
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+	g_Renderer->DrawFullScreenColor ( 1 , 1 , 1 , 0.2 );
 
 	// Renderer Test
 	//g_Renderer->DrawSolidRect(0, 0, 0, 4, 1, 0, 1, 1);
 	//g_Renderer->DrawTriangle();
-	//g_Renderer->DrawParticles();
+	g_Renderer->DrawParticles();
 	//g_Renderer->DrawFS();
 	//g_Renderer->DrawDummy();
 	//g_Renderer->DrawDummy_FBO();
 	//g_Renderer->DrawAll_FBO( );
 	//g_Renderer->DrawMultipleRenderTarget ( );
-	g_Renderer->DrawTriangle_Bloom ( );
+	//g_Renderer->DrawTriangle_Bloom ( );
 
 	glutSwapBuffers();
 }

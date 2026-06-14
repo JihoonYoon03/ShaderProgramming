@@ -215,7 +215,44 @@ void Shape()
     v_Tex = a_Tex;
 }
 
+void Ex1()
+{
+    vec4 pos = vec4(0, 0, 0, 1);
+    float radius = ceil(a_RV1 * 5.0) / 5.0;
+    pos.x = a_Pos.x + radius * sin(a_RV0 * 2 * c_PI);
+    pos.y = a_Pos.y + radius * cos(a_RV0 * 2 * c_PI);
+
+    v_Color = vec3(0);
+    gl_Position = pos;
+}
+
+void Ex2()
+{
+    vec4 pos = vec4(0, 0, 0, 1);
+    float trans = ceil(a_RV1 * 5.0) / 5.0;
+    pos.x = a_Pos.x + a_RV0 * 2 - 1.0;
+    pos.y = a_Pos.y + trans + 0.2 * sin(a_RV0 * 2 * c_PI);
+
+    v_Color = vec3(0);
+    gl_Position = pos;
+}
+
+void Ex3()
+{
+    vec4 pos = vec4(0, 0, 0, 1);
+    float t = fract(u_Time / 2.0) * 2.0;
+
+    pos.x = a_Pos.x + cos(c_PI * 2 * t - 1.0);
+    pos.y = a_Pos.y + sin(c_PI * 2 * t - 1.0);
+
+    v_Color = vec3(0);
+    gl_Position = pos;
+}
+
 void main()
 {
-    Falling_circle();
+    //Falling_circle();
+    //Ex1();
+    //Ex2();
+    Ex3();
 }
